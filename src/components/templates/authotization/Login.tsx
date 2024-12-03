@@ -15,8 +15,10 @@ import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
-import { GoogleIcon, FacebookIcon } from "./CustomIcons";
+import { GoogleIcon } from "./CustomIcons";
 import AppTheme from "../shared-theme/AppTheme";
+import { signInWithEmailAndPassword, signInWithGoogle } from "@/app/lib/auth";
+import { useRouter } from "next/navigation";
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -66,6 +68,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const router = useRouter();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -75,16 +79,27 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     setOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (emailError || passwordError) {
-      event.preventDefault();
       return;
     }
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const email = data.get("email") as string;
+    const password = data.get("password") as string;
+    try {
+      const user = await signInWithEmailAndPassword(email, password);
+      const idToken = await user.getIdToken();
+      await fetch("/api/login", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      router.push("/");
+    } catch (e) {
+      setError((e as Error).message);
+    }
   };
 
   const validateInputs = () => {
@@ -199,23 +214,29 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign in with Google")}
+              onClick={async () => {
+                try {
+                  const user = await signInWithGoogle();
+                  const idToken = await user.getIdToken();
+                  await fetch("/api/login", {
+                    headers: {
+                      Authorization: `Bearer ${idToken}`,
+                    },
+                  });
+                  router.push("/");
+                } catch (error) {
+                  setError((error as Error).message);
+                }
+              }}
               startIcon={<GoogleIcon />}
             >
               Sign in with Google
             </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign in with Facebook")}
-              startIcon={<FacebookIcon />}
-            >
-              Sign in with Facebook
-            </Button>
+
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/auth/signup"
                 variant="body2"
                 sx={{ alignSelf: "center" }}
               >

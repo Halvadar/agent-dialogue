@@ -10,7 +10,6 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import AppNavbar from "./components/AppNavbar";
 import Header from "./components/Header";
-import MainGrid from "./components/MainGrid";
 import SideMenu from "./components/SideMenu";
 import AppTheme from "../shared-theme/AppTheme";
 
@@ -18,7 +17,7 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", gap: 2 }}>
         <SideMenu />
         <AppNavbar />
         {/* Main content */}
@@ -42,7 +41,6 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
             }}
           >
             <Header />
-            <MainGrid />
           </Stack>
         </Box>
       </Box>
