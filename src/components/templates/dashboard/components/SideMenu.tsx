@@ -11,6 +11,8 @@ import OptionsMenu from "./OptionsMenu";
 import AgentIcon from "@/public/agent-dialogue.webp";
 import Image from "next/image";
 import Link from "next/link";
+import { useContext } from "react";
+import { AuthContext } from "@/app/context/AuthContext";
 
 const drawerWidth = 240;
 
@@ -26,6 +28,7 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function SideMenu() {
+  const { user } = useContext(AuthContext);
   return (
     <Drawer
       variant="permanent"
@@ -73,10 +76,10 @@ export default function SideMenu() {
             variant="body2"
             sx={{ fontWeight: 500, lineHeight: "16px" }}
           >
-            Riley Carter
+            {user?.displayName || "Unknown User"}
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            riley@email.com
+            {user?.email || "Unknown User"}
           </Typography>
         </Box>
         <OptionsMenu />

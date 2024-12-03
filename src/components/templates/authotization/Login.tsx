@@ -96,7 +96,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      router.push("/");
+      router.push("/dashboard");
     } catch (e) {
       setError((e as Error).message);
     }
@@ -223,7 +223,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                       Authorization: `Bearer ${idToken}`,
                     },
                   });
-                  router.push("/");
+                  router.push("/dashboard");
                 } catch (error) {
                   setError((error as Error).message);
                 }

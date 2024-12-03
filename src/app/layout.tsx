@@ -5,6 +5,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { Roboto } from "next/font/google";
 
 import AppTheme from "@/components/templates/shared-theme/AppTheme";
+import { AuthContextProvider } from "./context/AuthContext";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -39,7 +40,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${roboto.variable}`}
       >
         <AppRouterCacheProvider>
-          <AppTheme>{children}</AppTheme>
+          <AppTheme>
+            <AuthContextProvider>{children}</AuthContextProvider>
+          </AppTheme>
         </AppRouterCacheProvider>
       </body>
     </html>
