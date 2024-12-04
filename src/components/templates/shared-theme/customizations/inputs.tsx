@@ -402,21 +402,22 @@ export const inputsCustomizations: Components<Theme> = {
         }),
         variants: [
           {
-            props: {
-              size: 'small',
+            props:{
+              size: 'custom-small',
             },
             style: {
               height: '2.25rem',
-            },
+            }
           },
           {
-            props: {
-              size: 'medium',
+            props:{
+              size: 'custom-medium',
             },
             style: {
               height: '2.5rem',
-            },
+            }
           },
+         
         ],
       }),
       notchedOutline: {

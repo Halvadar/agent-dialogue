@@ -12,15 +12,17 @@ import AppNavbar from "./components/AppNavbar";
 import Header from "./components/Header";
 import SideMenu from "./components/SideMenu";
 import AppTheme from "../shared-theme/AppTheme";
+import MainGrid from "./components/MainGrid";
 
 export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
-      <Box sx={{ display: "flex", gap: 2 }}>
+      <Box sx={{ display: "flex", gap: 1, height: "100vh" }}>
         <SideMenu />
         <AppNavbar />
         {/* Main content */}
+
         <Box
           component="main"
           sx={(theme) => ({
@@ -29,6 +31,7 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
               ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
               : alpha(theme.palette.background.default, 1),
             overflow: "auto",
+            display: "flex",
           })}
         >
           <Stack
@@ -38,9 +41,11 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
               mx: 3,
               pb: 5,
               mt: { xs: 8, md: 0 },
+              flexGrow: 1,
             }}
           >
             <Header />
+            <MainGrid />
           </Stack>
         </Box>
       </Box>

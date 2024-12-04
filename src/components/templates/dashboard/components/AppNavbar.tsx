@@ -12,7 +12,7 @@ import SideMenuMobile from "./SideMenuMobile";
 import MenuButton from "./MenuButton";
 import ColorModeIconDropdown from "../../shared-theme/ColorModeIconDropdown";
 import Image from "next/image";
-import AgentIcon from "@/public/agent-dialogue-mobile.png";
+import AgentIcon from "@/public/ai-assistant.svg";
 const Toolbar = styled(MuiToolbar)({
   width: "100%",
   padding: "12px",

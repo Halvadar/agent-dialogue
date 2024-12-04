@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
-import AgentIcon from "@/public/agent-dialogue.webp";
+import AgentIcon from "@/public/ai-assistant.svg";
 import Image from "next/image";
 import Link from "next/link";
 import { useContext } from "react";
@@ -44,9 +44,8 @@ export default function SideMenu() {
           position="relative"
           sx={{
             display: "flex",
-            p: 3,
-            m: 3,
-            height: 20,
+            height: 40,
+            m: 2,
           }}
         >
           <Image src={AgentIcon} alt="Agents" fill objectFit="contain" />

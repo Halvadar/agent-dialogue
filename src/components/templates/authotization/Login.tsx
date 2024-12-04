@@ -9,16 +9,17 @@ import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
 import { GoogleIcon } from "./CustomIcons";
-import AppTheme from "../shared-theme/AppTheme";
 import { signInWithEmailAndPassword, signInWithGoogle } from "@/app/lib/auth";
 import { useRouter } from "next/navigation";
+import { TextField } from "@mui/material";
+import AuthTheme from "../shared-theme/AuthTheme";
+
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -130,7 +131,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   };
 
   return (
-    <AppTheme {...props}>
+    <AuthTheme {...props}>
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined" sx={{ width: "100%" }}>
@@ -246,6 +247,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
           </Box>
         </Card>
       </SignInContainer>
-    </AppTheme>
+    </AuthTheme>
   );
 }

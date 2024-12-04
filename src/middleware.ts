@@ -30,7 +30,9 @@ export async function middleware(request: NextRequest) {
     },
     handleValidToken: async ({}, headers) => {
       if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-        return redirectToHome(request);
+        return redirectToHome(request, {
+          path: "/dashboard",
+        });
       }
 
       return NextResponse.next({

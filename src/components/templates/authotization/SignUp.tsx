@@ -12,10 +12,10 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
-import AppTheme from "../shared-theme/AppTheme";
 import { GoogleIcon } from "./CustomIcons";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import { createUserWithEmailAndPassword } from "@/app/lib/auth";
+import AuthTheme from "../shared-theme/AuthTheme";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -114,11 +114,10 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     const password = data.get("password") as string;
 
     createUserWithEmailAndPassword(email, password);
-
   };
 
   return (
-    <AppTheme {...props}>
+    <AuthTheme {...props}>
       <CssBaseline enableColorScheme />
       <ColorModeSelect sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
       <SignUpContainer direction="column" justifyContent="space-between">
@@ -216,6 +215,6 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
           </Box>
         </Card>
       </SignUpContainer>
-    </AppTheme>
+    </AuthTheme>
   );
 }
