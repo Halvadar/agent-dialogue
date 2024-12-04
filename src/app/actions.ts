@@ -6,32 +6,26 @@ import { revalidateTag } from "next/cache";
 import { getDecodedTokenServerside } from "./lib/getDecodedTokenServerside";
 
 export async function createAgent(formData: FormData) {
+  console.log("Creating agent");
   try {
-    // Get the current user
     const decodedToken = await getDecodedTokenServerside();
     const userId = decodedToken.uid;
 
-    // Get the form data
     const name = formData.get("name");
     const instructions = formData.get("instructions");
 
-    // Create the agent document
     const agentData = {
       name,
       instructions,
       userId,
     };
 
-    // Add to Firestore
     const agentsRef = collection(db, "agents");
-    const docRef = await addDoc(agentsRef, agentData);
-
-    // Revalidate the agents page
+    await addDoc(agentsRef, agentData);
     revalidateTag("agents");
-
-    return { success: true, id: docRef.id };
+    return { success: true, message: "Agent created successfully" };
   } catch (error) {
     console.error("Error creating agent:", error);
-    return { success: false, error: "Failed to create agent" };
+    return { success: false, message: "Failed to create agent" };
   }
 }
