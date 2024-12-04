@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL as string,
       privateKey: process.env.FIREBASE_PRIVATE_KEY as string,
     },
-    handleValidToken: async ({ token, decodedToken }, headers) => {
+    handleValidToken: async ({}, headers) => {
       if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
         return redirectToHome(request);
       }

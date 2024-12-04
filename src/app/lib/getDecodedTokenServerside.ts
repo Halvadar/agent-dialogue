@@ -1,12 +1,10 @@
+"server only";
+
 import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const getDecodedTokenServerside = async () => {
   const tokens = await getTokens(cookies(), {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string,
     cookieName: process.env.NEXT_PUBLIC_FIREBASE_COOKIE_NAME as string,
@@ -23,10 +21,11 @@ export default async function Layout({
       )!,
     },
   });
-
   if (!tokens) {
     redirect("/auth/login");
   }
 
-  return <>{children}</>;
-}
+  const { decodedToken } = tokens;
+
+  return decodedToken;
+};
