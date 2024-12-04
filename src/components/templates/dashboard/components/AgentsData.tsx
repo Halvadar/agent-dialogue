@@ -1,27 +1,18 @@
 "use server";
 
-import { db } from "@/app/lib/firebase";
+import { getAgents, getMyAgents } from "@/app/utils/agents";
+import { AgentsProvider } from "../../../../app/context/AgentsContext";
 
-import { collection, getDocs } from "firebase/firestore";
-import Agents from "./Agents";
-
-type Agent = {
-  id: string;
-  name: string;
-  instructions: string;
-  creator: string;
-};
-
-async function getAgents(): Promise<Agent[]> {
-  const agentsSnapshot = await getDocs(collection(db, "agents"));
-  const agents = agentsSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Agent[];
-  return agents;
-}
-
-export default async function AgentsData() {
+export default async function AgentsData({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const agents = await getAgents();
-  return <Agents agents={agents} />;
+  const myAgents = await getMyAgents();
+  return (
+    <AgentsProvider myAgents={myAgents} agents={agents}>
+      {children}
+    </AgentsProvider>
+  );
 }

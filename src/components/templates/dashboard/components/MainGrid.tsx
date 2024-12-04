@@ -13,7 +13,9 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import { Box, Button, Dialog } from "@mui/material";
 import { createAgent } from "@/app/actions";
-export default function MainGrid({ agents }) {
+import { useAgents } from "@/app/context/AgentsContext";
+export default function MainGrid({ agents }: { agents: React.ReactNode }) {
+  const { selectedAgents } = useAgents();
   const [tabValue, setTabValue] = React.useState(0);
   const [open, setOpen] = React.useState(false);
   const handleTabChange = (
@@ -33,18 +35,20 @@ export default function MainGrid({ agents }) {
     handleClose();
   };
 
+  const handleStartConversation = () => {
+    console.log("Starting conversation between:", selectedAgents);
+  };
+
   return (
     <Paper
       elevation={3}
       sx={{
-        width: "100%",
-        maxWidth: { sm: "100%", md: "1700px" },
-        flexGrow: 1,
-        alignSelf: "flex-start",
+        alignSelf: "stretch",
         display: "flex",
         flexDirection: "column",
         gap: 2,
         p: 3,
+        maxWidth: { sm: "100%", md: "60%" },
       }}
     >
       <Tabs value={tabValue} onChange={handleTabChange}>
@@ -53,7 +57,7 @@ export default function MainGrid({ agents }) {
       </Tabs>
       <Divider />
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+        <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4, xl: 2 }}>
           <Card
             sx={{
               height: "100%",
@@ -161,6 +165,28 @@ export default function MainGrid({ agents }) {
           </Box>
         </Card>
       </Dialog>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          alignItems: "flex-end",
+          flex: 1,
+          gap: 1,
+        }}
+      >
+        <Divider sx={{ alignSelf: "stretch" }} />
+        <Button
+          variant="contained"
+          onClick={handleStartConversation}
+          disabled={Object.keys(selectedAgents).length !== 2}
+          sx={{
+            mt: 3,
+          }}
+        >
+          Start Conversation
+        </Button>
+      </Box>
     </Paper>
   );
 }
