@@ -13,9 +13,8 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import { Box, Button, Dialog } from "@mui/material";
 import { createAgent } from "@/app/actions";
-import { useAgents } from "@/app/context/AgentsContext";
+
 export default function MainGrid({ agents }: { agents: React.ReactNode }) {
-  const { selectedAgents } = useAgents();
   const [tabValue, setTabValue] = React.useState(0);
   const [open, setOpen] = React.useState(false);
   const handleTabChange = (
@@ -33,10 +32,6 @@ export default function MainGrid({ agents }: { agents: React.ReactNode }) {
   const handleSubmit = async (formData: FormData) => {
     await createAgent(formData);
     handleClose();
-  };
-
-  const handleStartConversation = () => {
-    console.log("Starting conversation between:", selectedAgents);
   };
 
   return (
@@ -174,19 +169,7 @@ export default function MainGrid({ agents }: { agents: React.ReactNode }) {
           flex: 1,
           gap: 1,
         }}
-      >
-        <Divider sx={{ alignSelf: "stretch" }} />
-        <Button
-          variant="contained"
-          onClick={handleStartConversation}
-          disabled={Object.keys(selectedAgents).length !== 2}
-          sx={{
-            mt: 3,
-          }}
-        >
-          Start Conversation
-        </Button>
-      </Box>
+      ></Box>
     </Paper>
   );
 }

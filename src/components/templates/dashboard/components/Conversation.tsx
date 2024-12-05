@@ -1,17 +1,10 @@
 "use client";
 
 import { useAgents } from "@/app/context/AgentsContext";
-import {
-  Box,
-  Card,
-  Typography,
-  TextField,
-  Button,
-  Avatar,
-  Paper,
-} from "@mui/material";
-import { useState } from "react";
-
+import { Box, Card, Typography, TextField, Button, Paper } from "@mui/material";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useChat } from "ai/react";
+import { Agent } from "@/app/types/agents";
 type Message = {
   content: string;
   sender: string;
@@ -19,19 +12,79 @@ type Message = {
 };
 
 export default function Conversation() {
-  const { selectedAgents, agents } = useAgents();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    append,
+    setMessages,
+    reload,
+    stop,
+    isLoading,
+  } = useChat();
+  const { selectedAgents } = useAgents();
+  const [chatIsActive, setChatIsActive] = useState(false);
+  const currentAgent = useRef(selectedAgents[Object.keys(selectedAgents)[0]]);
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message: Message = {
-        content: newMessage,
-        sender: agents[0].id, // For now, always send from first agent
-        timestamp: new Date(),
-      };
-      setMessages([...messages, message]);
-      setNewMessage("");
+    if (chatIsActive && !isLoading) {
+      console.log("chatIsActive");
+      timeout = setTimeout(() => {
+        if (messages.length === 0) {
+          append(
+            {
+              role: "user",
+              content:
+                "You are an agent in a conversation with another agent. Make an introduction of yourself",
+            },
+            { body: { systemMessage: currentAgent.current?.instructions } }
+          ).then(() => {
+            currentAgent.current =
+              currentAgent.current ===
+              selectedAgents[Object.keys(selectedAgents)[0]]
+                ? selectedAgents[Object.keys(selectedAgents)[1]]
+                : selectedAgents[Object.keys(selectedAgents)[0]];
+          });
+        } else {
+          setMessages((messages) =>
+            messages.map((message) => ({
+              ...message,
+              role: message.role === "user" ? "assistant" : "user",
+            }))
+          );
+          reload({
+            body: { systemMessage: currentAgent.current?.instructions },
+          }).then(() => {
+            currentAgent.current =
+              currentAgent.current ===
+              selectedAgents[Object.keys(selectedAgents)[0]]
+                ? selectedAgents[Object.keys(selectedAgents)[1]]
+                : selectedAgents[Object.keys(selectedAgents)[0]];
+          });
+        }
+      }, 6000);
+    }
+    return () => clearTimeout(timeout);
+  }, [
+    setMessages,
+    chatIsActive,
+    handleSubmit,
+    append,
+    selectedAgents,
+    reload,
+    messages.length,
+    isLoading,
+  ]);
+
+  const handleInputSubmit = () => {
+    if (chatIsActive) {
+      stop();
+      setChatIsActive(false);
+    } else {
+      handleSubmit();
+      setChatIsActive(true);
     }
   };
 
@@ -45,6 +98,7 @@ export default function Conversation() {
         gap: 2,
         p: 3,
         display: { xs: "none", md: "flex" },
+        maxWidth: { xs: "100%", md: "40%" },
       }}
     >
       {Object.keys(selectedAgents).length > 0 ? (
@@ -89,62 +143,53 @@ export default function Conversation() {
               display: "flex",
               flexDirection: "column",
               gap: 2,
+              flexGrow: 1,
             }}
           >
-            {messages.map((message, index) => (
-              <Box
-                key={index}
-                sx={{
-                  alignSelf:
-                    message.sender === agents[0].id ? "flex-start" : "flex-end",
-                  maxWidth: "70%",
-                }}
-              >
-                <Card
-                  variant="outlined"
-                  sx={{
-                    p: 1,
-                    bgcolor:
-                      message.sender === agents[0].id
-                        ? "primary.light"
-                        : "secondary.light",
-                  }}
-                >
-                  <Typography variant="body1">{message.content}</Typography>
-                </Card>
-              </Box>
+            {messages.map((m) => (
+              <>
+                {m.role === "user" ? "User: " : "AI: "}
+                {m.toolInvocations ? (
+                  <pre>{JSON.stringify(m.toolInvocations, null, 2)}</pre>
+                ) : (
+                  <p>{m.content}</p>
+                )}
+              </>
             ))}
           </Box>
 
-          {/* Message Input */}
           <Box
             sx={{
-              p: 2,
-              borderTop: 1,
-              borderColor: "divider",
               display: "flex",
-              gap: 2,
+              flexDirection: "column",
+              justifyContent: "flex-end",
             }}
           >
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSendMessage();
-                }
+            <Box
+              sx={{
+                p: 2,
+                borderTop: 1,
+                borderColor: "divider",
+                display: "flex",
+                gap: 2,
               }}
-            />
-            <Button
-              variant="contained"
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
             >
-              Send
-            </Button>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Type an opening message..."
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleInputSubmit();
+                  }
+                }}
+              />
+              <Button variant="contained" onClick={handleInputSubmit}>
+                Start
+              </Button>
+            </Box>
           </Box>
         </>
       ) : (
