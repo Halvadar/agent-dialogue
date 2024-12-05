@@ -16,11 +16,18 @@ import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAgents } from "@/app/context/AgentsContext";
 import { Agent } from "@/app/types/agents";
+import { Timestamp } from "firebase/firestore";
 
-export default function Agents() {
-  const { selectedAgents, setSelectedAgent, agents } = useAgents();
+interface AgentsProps {
+  currentTab: number;
+}
+
+export default function Agents({ currentTab }: AgentsProps) {
+  const { selectedAgents, setSelectedAgent, agents, myAgents } = useAgents();
   const [openedAgent, setOpenedAgent] = useState<Agent | null>(null);
   const [open, setOpen] = useState(false);
+
+  const displayedAgents = currentTab === 0 ? agents : myAgents;
 
   const handleOpen = (agent: Agent) => {
     setOpenedAgent(agent);
@@ -46,7 +53,7 @@ export default function Agents() {
 
   return (
     <>
-      {agents.map((agent, index) => (
+      {displayedAgents.map((agent, index) => (
         <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4, xl: 2 }} key={index}>
           <Card
             sx={{
@@ -64,7 +71,13 @@ export default function Agents() {
             }}
             onClick={(e) => handleCardClick(e, agent)}
           >
-            <CardContent>
+            <CardContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+              }}
+            >
               <Typography
                 variant="h6"
                 gutterBottom
@@ -81,6 +94,7 @@ export default function Agents() {
                 sx={{
                   mb: 2,
                   minHeight: "4.5em",
+                  flexGrow: 1, // Allow this to grow and push the button down
                 }}
               >
                 {agent.instructions.length > 200
@@ -89,6 +103,12 @@ export default function Agents() {
               </Typography>
               <Typography variant="caption" display="block" sx={{ mt: "auto" }}>
                 Created by: {agent.creator}
+              </Typography>
+              <Typography variant="caption" display="block">
+                Created:{" "}
+                {agent.createdAt instanceof Timestamp
+                  ? agent.createdAt.toDate().toLocaleDateString()
+                  : "N/A"}
               </Typography>
               <Button
                 variant="contained"
@@ -168,6 +188,19 @@ export default function Agents() {
               }}
             >
               Created by: {openedAgent?.creator}
+            </Typography>
+            <Typography
+              variant="caption"
+              display="block"
+              sx={{
+                color: "text.secondary",
+                fontStyle: "italic",
+              }}
+            >
+              Created on:{" "}
+              {openedAgent?.createdAt instanceof Timestamp
+                ? openedAgent.createdAt.toDate().toLocaleDateString()
+                : "N/A"}
             </Typography>
           </DialogContent>
         </Card>

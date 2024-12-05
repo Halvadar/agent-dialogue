@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/app/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { revalidateTag } from "next/cache";
 import { getDecodedTokenServerside } from "./lib/getDecodedTokenServerside";
 
@@ -13,11 +13,12 @@ export async function createAgent(formData: FormData) {
 
     const name = formData.get("name");
     const instructions = formData.get("instructions");
-
+    const date = Timestamp.now();
     const agentData = {
       name,
       instructions,
       userId,
+      createdAt: date,
     };
 
     const agentsRef = collection(db, "agents");

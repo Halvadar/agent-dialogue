@@ -16,7 +16,7 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
       <Header />
       <Box sx={{ flex: 1, display: "flex", gap: 2, width: "100%" }}>
         <Conversation />
-        <MainGrid agents={<Agents />} />
+        <MainGrid />
       </Box>
     </DashboardClient>
   );

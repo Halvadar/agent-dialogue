@@ -13,10 +13,12 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import { Box, Button, Dialog } from "@mui/material";
 import { createAgent } from "@/app/actions";
+import Agents from "./Agents";
 
-export default function MainGrid({ agents }: { agents: React.ReactNode }) {
+export default function MainGrid() {
   const [tabValue, setTabValue] = React.useState(0);
   const [open, setOpen] = React.useState(false);
+
   const handleTabChange = (
     event: React.ChangeEvent<unknown>,
     newValue: number
@@ -44,6 +46,7 @@ export default function MainGrid({ agents }: { agents: React.ReactNode }) {
         gap: 2,
         p: 3,
         maxWidth: { sm: "100%", md: "60%" },
+        flex: 1,
       }}
     >
       <Tabs value={tabValue} onChange={handleTabChange}>
@@ -90,7 +93,7 @@ export default function MainGrid({ agents }: { agents: React.ReactNode }) {
             </Typography>
           </Card>
         </Grid>
-        {agents}
+        <Agents currentTab={tabValue} />
       </Grid>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <Card variant="outlined" sx={{ p: 4 }}>
