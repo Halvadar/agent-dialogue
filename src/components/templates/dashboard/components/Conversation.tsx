@@ -2,7 +2,7 @@
 
 import { useAgents } from "@/app/context/AgentsContext";
 import { Box, Card, Typography, TextField, Button, Paper } from "@mui/material";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "ai/react";
 import type { Message } from "ai/react";
 import { Agent } from "@/app/types/agents";
@@ -22,113 +22,64 @@ export default function Conversation() {
     reload,
     stop,
     isLoading,
-  } = useChat({});
+  } = useChat({ onFinish: onFinishReceivingMessage });
+  let timeOutRef = useRef<NodeJS.Timeout | null>(null);
+  function onFinishReceivingMessage() {
+    timeOutRef.current = setTimeout(() => {
+      getCurrentAgent.getNextAgent();
+      setMessages((prevMessages) => {
+        const prevMessagesCopy = [...prevMessages];
+
+        return prevMessagesCopy.map((m) =>
+          m.role === "assistant" ? { ...m, role: "user" } : m
+        );
+      });
+      reload({
+        body: {
+          systemMessage: getCurrentAgent.currentAgent.instructions,
+        },
+      });
+    }, 5000);
+  }
   const { selectedAgents } = useAgents();
+  const getCurrentAgent = useMemo(() => {
+    return {
+      currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],
+      getNextAgent: function () {
+        this.currentAgent =
+          Object.values(selectedAgents)[
+            (Object.values(selectedAgents).indexOf(this.currentAgent) + 1) %
+              Object.values(selectedAgents).length
+          ];
+      },
+    };
+  }, [selectedAgents]);
   const [chatIsActive, setChatIsActive] = useState(false);
-  const currentAgent = useRef(selectedAgents[Object.keys(selectedAgents)[0]]);
-  const [messagesUpdated, setMessagesUpdated] = useState(false);
-  const [messageIdentities, setMessageIdentities] = useState<
-    Record<string, string>
-  >({});
+
   const [messageSequence, setMessageSequence] = useState<MessageWithIdentity[]>(
     []
   );
-  useEffect(() => {
-    console.log(messages.length, isLoading);
-    if (messages.length > 0 && !isLoading && !messagesUpdated) {
-      console.log(messages);
-      const newMessages = messages.filter((m) => !messageIdentities[m.id]);
-      const newMessagesWithIdentities = newMessages.map((m) => ({
-        ...m,
-        identity: m.role === "assistant" ? currentAgent.current?.id : m.role,
-        ignore: m.role === "system" || m.id === "empty-message" ? true : false,
-      }));
-      setMessageSequence((pastMessageSequence) => [
-        ...pastMessageSequence,
-        ...newMessagesWithIdentities,
-      ]);
-      setMessageIdentities((pastMessageIdentities) => ({
-        ...pastMessageIdentities,
-        ...Object.fromEntries(
-          newMessagesWithIdentities.map((m) => [m.id, m.identity])
-        ),
-      }));
-      setMessagesUpdated(true);
-    }
-  }, [messages, isLoading]);
-  //   useEffect(() => {
-  //     console.log(messages);
-  //     if (isLoading && messages.length > 0 && !messagesUpdated) {
-  //       setMessages((messages) =>
-
-  //       );
-  //       setMessagesUpdated(true);
-  //     }
-  //   }, [messages, setMessages, isLoading, messagesUpdated]);
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (chatIsActive && !isLoading) {
-      if (messages.length === 0) {
-        append(
-          {
-            role: "system",
-            content:
-              "You are an agent in a conversation with other agents. Make an introduction of yourself. Let everyone knwo who you are. sometimes your messages are not from you, but from other agents. Give answers based on the past messages.",
-          },
-          { body: { systemMessage: currentAgent.current?.instructions } }
-        ).then(() => {
-          currentAgent.current =
-            currentAgent.current ===
-            selectedAgents[Object.keys(selectedAgents)[0]]
-              ? selectedAgents[Object.keys(selectedAgents)[1]]
-              : selectedAgents[Object.keys(selectedAgents)[0]];
-        });
-      } else {
-        timeout = setTimeout(() => {
-          setMessages((messages) => [
-            ...messages,
-            {
-              id: "empty-message",
-              role: "assistant",
-              content: "empty message",
-              data: { ignore: true },
-            },
-          ]);
-          reload({
-            body: { systemMessage: currentAgent.current?.instructions },
-          }).then(() => {
-            currentAgent.current =
-              currentAgent.current ===
-              selectedAgents[Object.keys(selectedAgents)[0]]
-                ? selectedAgents[Object.keys(selectedAgents)[1]]
-                : selectedAgents[Object.keys(selectedAgents)[0]];
-            setMessagesUpdated(false);
-          });
-        }, 6000);
-      }
-    }
-    return () => clearTimeout(timeout);
-  }, [
-    setMessages,
-    chatIsActive,
-    handleSubmit,
-    append,
-    selectedAgents,
-    reload,
-    messages.length,
-    isLoading,
-  ]);
 
   const handleInputSubmit = () => {
     if (chatIsActive) {
       stop();
       setChatIsActive(false);
+      clearTimeout(timeOutRef.current!);
     } else {
-      handleSubmit();
       setChatIsActive(true);
+      if (messages.length === 0) {
+        append(
+          {
+            role: "system",
+            content: "Introduce yourself and ask a question.",
+          },
+          { body: { systemMessage: getCurrentAgent.currentAgent.instructions } }
+        );
+      } else {
+        handleSubmit();
+      }
     }
   };
-  console.log(messageSequence);
 
   return (
     <Paper
@@ -188,12 +139,11 @@ export default function Conversation() {
               flexGrow: 1,
             }}
           >
-            {messageSequence.map((m, index) => {
-              if (!m.ignore) {
-                const isUser = m.identity === "user";
+            {messages
+              .filter((m) => m.role !== "system")
+              .map((m, index) => {
                 const agentKeys = Object.keys(selectedAgents);
-                const isFirstAgent =
-                  m.identity === selectedAgents[agentKeys[0]]?.id;
+                const isFirstAgent = index % 2 === 0;
 
                 return (
                   <Box
@@ -201,16 +151,8 @@ export default function Conversation() {
                     sx={{
                       display: "flex",
                       flexDirection: "column",
-                      alignItems: isUser
-                        ? "flex-end"
-                        : isFirstAgent
-                        ? "flex-start"
-                        : "flex-end",
-                      alignSelf: isUser
-                        ? "flex-end"
-                        : isFirstAgent
-                        ? "flex-start"
-                        : "flex-end",
+                      alignItems: isFirstAgent ? "flex-start" : "flex-end",
+                      alignSelf: isFirstAgent ? "flex-start" : "flex-end",
                       maxWidth: "70%",
                     }}
                   >
@@ -222,21 +164,15 @@ export default function Conversation() {
                         px: 1,
                       }}
                     >
-                      {selectedAgents[m.identity]
-                        ? selectedAgents[m.identity].name
-                        : "User"}
+                      {selectedAgents[agentKeys[isFirstAgent ? 0 : 1]].name}
                     </Typography>
                     <Paper
                       elevation={1}
                       sx={{
                         p: 2,
                         borderRadius: 2,
-                        bgcolor: isUser
-                          ? "primary.main"
-                          : isFirstAgent
-                          ? "#f0f0f0"
-                          : "#e3f2fd",
-                        color: isUser ? "white" : "text.primary",
+                        bgcolor: isFirstAgent ? "#f0f0f0" : "#e3f2fd",
+                        color: "text.primary",
                         maxWidth: "100%",
                         wordBreak: "break-word",
                       }}
@@ -251,9 +187,7 @@ export default function Conversation() {
                     </Paper>
                   </Box>
                 );
-              }
-              return null;
-            })}
+              })}
           </Box>
 
           <Box
@@ -284,8 +218,17 @@ export default function Conversation() {
                   }
                 }}
               />
-              <Button variant="contained" onClick={handleInputSubmit}>
-                Start
+              <Button
+                variant="contained"
+                onClick={handleInputSubmit}
+                sx={{
+                  bgcolor: chatIsActive ? "red" : "primary.main",
+                  "&:hover": {
+                    bgcolor: chatIsActive ? "darkred" : "primary.dark",
+                  },
+                }}
+              >
+                {chatIsActive ? "Stop" : "Start"}
               </Button>
             </Box>
           </Box>
