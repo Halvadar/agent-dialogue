@@ -5,6 +5,8 @@ import { db } from "@/app/lib/firebase";
 
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getDecodedTokenServerside } from "../lib/getDecodedTokenServerside";
+import { Conversation } from "../types/agents";
+
 export async function getAgents(): Promise<Agent[]> {
   const agentsSnapshot = await getDocs(collection(db, "agents"));
   const agents = agentsSnapshot.docs.map((doc) => ({
@@ -24,4 +26,19 @@ export async function getMyAgents(): Promise<Agent[]> {
     ...doc.data(),
   })) as Agent[];
   return agents;
+}
+
+export async function getConversations(): Promise<Conversation[]> {
+  const decodedToken = await getDecodedTokenServerside();
+  const conversationsSnapshot = await getDocs(
+    query(
+      collection(db, "conversations"),
+      where("userId", "==", decodedToken.uid)
+    )
+  );
+  const conversations = conversationsSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Conversation[];
+  return conversations;
 }

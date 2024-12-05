@@ -1,12 +1,13 @@
 "use client";
 import React, { createContext, useState, ReactNode } from "react";
-import { Agent } from "../types/agents";
+import { Agent, Conversation } from "../types/agents";
 
 // Define the shape of the context state
 interface AgentsContextType {
   agents: Agent[];
   myAgents: Agent[];
   selectedAgents: { [key: string]: Agent };
+  conversations: Conversation[];
   setSelectedAgent: (agent: Agent) => void;
 }
 
@@ -17,8 +18,9 @@ const AgentsContext = createContext<AgentsContextType | undefined>(undefined);
 export const AgentsProvider: React.FC<{
   agents: Agent[];
   myAgents: Agent[];
+  conversations: Conversation[];
   children: ReactNode;
-}> = ({ agents, myAgents, children }) => {
+}> = ({ agents, myAgents, conversations, children }) => {
   const [selectedAgents, setSelectedAgents] = useState<{
     [key: string]: Agent;
   }>({});
@@ -43,7 +45,13 @@ export const AgentsProvider: React.FC<{
 
   return (
     <AgentsContext.Provider
-      value={{ selectedAgents, setSelectedAgent, agents, myAgents }}
+      value={{
+        selectedAgents,
+        setSelectedAgent,
+        agents,
+        myAgents,
+        conversations,
+      }}
     >
       {children}
     </AgentsContext.Provider>

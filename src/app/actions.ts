@@ -31,15 +31,23 @@ export async function createAgent(formData: FormData) {
   }
 }
 
-export async function createMessageBox(formData: FormData) {
+export async function createConversation(formData: FormData) {
   try {
     const decodedToken = await getDecodedTokenServerside();
+    const creator = decodedToken.name || decodedToken.email;
     const userId = decodedToken.uid;
     const agent1 = formData.get("agent1");
     const agent2 = formData.get("agent2");
+    const date = Timestamp.now();
 
     const messageBoxRef = collection(db, "messageboxes");
-    await addDoc(messageBoxRef, { agent1, agent2, userId });
+    await addDoc(messageBoxRef, {
+      agent1,
+      agent2,
+      userId,
+      creator,
+      createdAt: date,
+    });
     revalidateTag("messageboxes");
     return { success: true, message: "Message box created successfully" };
   } catch (error) {

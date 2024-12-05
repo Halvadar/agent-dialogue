@@ -35,7 +35,7 @@ export default function Conversation() {
   );
   useEffect(() => {
     console.log(messages.length, isLoading);
-    if (messages.length > 0 && !isLoading) {
+    if (messages.length > 0 && !isLoading && !messagesUpdated) {
       console.log(messages);
       const newMessages = messages.filter((m) => !messageIdentities[m.id]);
       const newMessagesWithIdentities = newMessages.map((m) => ({

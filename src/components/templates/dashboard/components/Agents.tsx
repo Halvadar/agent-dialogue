@@ -102,7 +102,7 @@ export default function Agents({ currentTab }: AgentsProps) {
                   : agent.instructions}
               </Typography>
               <Typography variant="caption" display="block" sx={{ mt: "auto" }}>
-                Created by: {agent.creator}
+                Created by: {agent.creator || "N/A"}
               </Typography>
               <Typography variant="caption" display="block">
                 Created:{" "}
