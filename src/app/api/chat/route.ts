@@ -6,14 +6,12 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const { messages, systemMessage } = await req.json();
-  console.log(messages, systemMessage);
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    system: systemMessage,
+    system: `Your instructions are: "${systemMessage}"`,
     messages,
-    maxTokens: 1000,
+    maxTokens: 100,
   });
-  console.log("active");
 
   return result.toDataStreamResponse();
 }
