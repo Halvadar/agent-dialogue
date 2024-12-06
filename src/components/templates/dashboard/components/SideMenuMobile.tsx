@@ -10,6 +10,8 @@ import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 
 import MenuButton from "./MenuButton";
 import MenuContent from "./MenuContent";
+import { signOut } from "../../../../app/lib/auth";
+import { useRouter } from "next/navigation";
 
 interface SideMenuMobileProps {
   open: boolean | undefined;
@@ -20,6 +22,13 @@ export default function SideMenuMobile({
   open,
   toggleDrawer,
 }: SideMenuMobileProps) {
+  const router = useRouter();
+
+  const logout = async () => {
+    await signOut();
+    await fetch("/api/logout");
+    router.push("/auth/login");
+  };
   return (
     <Drawer
       anchor="right"
@@ -65,6 +74,7 @@ export default function SideMenuMobile({
         </Stack>
         <Stack sx={{ p: 2 }}>
           <Button
+            onClick={logout}
             variant="outlined"
             fullWidth
             startIcon={<LogoutRoundedIcon />}
