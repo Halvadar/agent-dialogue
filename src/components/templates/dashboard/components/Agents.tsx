@@ -26,7 +26,6 @@ export default function Agents({ currentTab }: AgentsProps) {
   const { selectedAgents, setSelectedAgent, agents, myAgents } = useAgents();
   const [openedAgent, setOpenedAgent] = useState<Agent | null>(null);
   const [open, setOpen] = useState(false);
-  console.log(agents);
   const displayedAgents = currentTab === 0 ? agents : myAgents;
 
   const handleOpen = (agent: Agent) => {

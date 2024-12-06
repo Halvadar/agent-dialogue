@@ -12,7 +12,6 @@ import { useConversations } from "@/app/context/ConversationContext";
 
 export default function MenuContent() {
   const { activeConversation, setActiveConversation } = useConversations();
-  console.log(activeConversation);
   const { conversations } = useAgents();
   return (
     <Stack sx={{ flexGrow: 1, p: 1, pt: 0, overflowY: "auto" }}>

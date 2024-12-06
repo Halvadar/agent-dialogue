@@ -5,15 +5,21 @@ import {
   Box,
   Card,
   Typography,
-  TextField,
   Button,
   Paper,
   CircularProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Slider,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "ai/react";
 import { createConversation } from "@/app/actions";
 import { useConversations } from "@/app/context/ConversationContext";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export default function Conversation() {
   const { messages, append, setMessages, reload, stop, isLoading } = useChat({
@@ -25,6 +31,8 @@ export default function Conversation() {
   const [isConvoCreated, setIsConvoCreated] = useState(false);
   const { selectedAgents } = useAgents();
   const [chatIsActive, setChatIsActive] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [messageInterval, setMessageInterval] = useState(5000);
   const getCurrentAgent = useMemo(() => {
     return {
       currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],
@@ -59,7 +67,7 @@ export default function Conversation() {
           systemMessage: getCurrentAgent.currentAgent.instructions,
         },
       });
-    }, 5000);
+    }, messageInterval);
   }
 
   const onCreateConversation = useCallback(async () => {
@@ -71,7 +79,6 @@ export default function Conversation() {
       formData.append("agent2Id", selectedAgents[agentKeys[1]].id);
       formData.append("firstMessage", messages[messages.length - 1].content);
       const conversation = await createConversation(formData);
-      console.log(conversation);
       if (conversation.success) {
         setActiveConversation(conversation.id);
       }
@@ -222,23 +229,29 @@ export default function Conversation() {
           <Box
             sx={{
               p: 2,
+              pt: 3,
               borderTop: 1,
               borderColor: "divider",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              alignItems: "center",
             }}
           >
+            <Box>
+              <IconButton onClick={() => setSettingsOpen(true)}>
+                <SettingsIcon />
+              </IconButton>
+            </Box>
             <Button
               variant="contained"
               onClick={handleInputSubmit}
               disabled={isLoading}
+              color={chatIsActive ? "error" : "primary"}
               sx={{
-                bgcolor: chatIsActive ? "red" : "primary.main",
-                "&:hover": {
-                  bgcolor: chatIsActive ? "darkred" : "primary.dark",
-                },
                 px: 4,
                 py: 1,
+                minWidth: 255,
               }}
             >
               {isLoading ? (
@@ -254,6 +267,7 @@ export default function Conversation() {
                 "Start Conversation"
               )}
             </Button>
+            <Box sx={{ width: 40 }} />
           </Box>
         </>
       ) : (
@@ -263,6 +277,28 @@ export default function Conversation() {
           </Typography>
         </Card>
       )}
+
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <DialogTitle>Chat Settings</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            Message Interval: {messageInterval / 1000} seconds
+          </Typography>
+          <Slider
+            value={messageInterval}
+            onChange={(_, value) => setMessageInterval(value as number)}
+            min={1000}
+            max={10000}
+            step={1000}
+            marks
+            valueLabelDisplay="auto"
+            valueLabelFormat={(value) => `${value / 1000}s`}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSettingsOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

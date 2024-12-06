@@ -19,7 +19,6 @@ export const ConversationProvider: React.FC<{
   const [activeConversation, setActiveConversation] = useState<string | null>(
     null
   );
-  console.log(activeConversation);
   return (
     <ConversationContext.Provider
       value={{

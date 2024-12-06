@@ -121,7 +121,6 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       const userreg = await createUserWithEmailAndPassword(email, password);
 
       const idToken = await userreg.getIdToken();
-      console.log(idToken);
       await fetch("/api/login", {
         headers: {
           Authorization: `Bearer ${idToken}`,
