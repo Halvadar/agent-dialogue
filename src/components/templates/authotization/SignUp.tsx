@@ -13,8 +13,13 @@ import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import { GoogleIcon } from "./CustomIcons";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
-import { createUserWithEmailAndPassword } from "@/app/lib/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithGoogle,
+} from "@/app/lib/auth";
 import AuthTheme from "../shared-theme/AuthTheme";
+import { useRouter } from "next/navigation";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -59,13 +64,14 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp(props: { disableCustomTheme?: boolean }) {
+  const router = useRouter();
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState("");
-
+  const [error, setError] = React.useState("");
   const validateInputs = () => {
     const email = document.getElementById("email") as HTMLInputElement;
     const password = document.getElementById("password") as HTMLInputElement;
@@ -103,7 +109,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     return isValid;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     if (nameError || emailError || passwordError) {
       event.preventDefault();
       return;
@@ -111,8 +117,21 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     const data = new FormData(event.currentTarget);
     const email = data.get("email") as string;
     const password = data.get("password") as string;
+    try {
+      const userreg = await createUserWithEmailAndPassword(email, password);
 
-    createUserWithEmailAndPassword(email, password);
+      const user = await signInWithEmailAndPassword(email, password);
+
+      const idToken = await user.getIdToken();
+      await fetch("/api/login", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      router.push("/dashboard");
+    } catch (e) {
+      setError((e as Error).message);
+    }
   };
 
   return (
@@ -194,7 +213,20 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign up with Google")}
+              onClick={async () => {
+                try {
+                  const user = await signInWithGoogle();
+                  const idToken = await user.getIdToken();
+                  await fetch("/api/login", {
+                    headers: {
+                      Authorization: `Bearer ${idToken}`,
+                    },
+                  });
+                  router.push("/dashboard");
+                } catch (error) {
+                  setError((error as Error).message);
+                }
+              }}
               startIcon={<GoogleIcon />}
             >
               Sign up with Google
