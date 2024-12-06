@@ -30,13 +30,11 @@ export const AgentsProvider: React.FC<{
     setSelectedAgents((prev) => {
       const prevKeys = Object.keys(prev);
       if (prev[agent.id]) {
-        const newState = { ...prev };
-        delete newState[agent.id];
+        const { [agent.id]: existing, ...newState } = prev;
         return newState;
       }
       if (prevKeys.length >= 2) {
-        const newState = { ...prev };
-        delete newState[prevKeys[0]];
+        const { [prevKeys[0]]: firstEl, ...newState } = prev;
         return { ...newState, [agent.id]: agent };
       }
       return { ...prev, [agent.id]: agent };

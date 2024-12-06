@@ -54,7 +54,7 @@ export default function Agents({ currentTab }: AgentsProps) {
   return (
     <>
       {displayedAgents.map((agent, index) => (
-        <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4, xl: 2 }} key={index}>
+        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} key={index}>
           <Card
             sx={{
               height: "100%",

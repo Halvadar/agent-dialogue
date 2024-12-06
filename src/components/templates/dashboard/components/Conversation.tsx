@@ -4,13 +4,8 @@ import { useAgents } from "@/app/context/AgentsContext";
 import { Box, Card, Typography, TextField, Button, Paper } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "ai/react";
-import type { Message } from "ai/react";
-import { Agent } from "@/app/types/agents";
+import { createConversation } from "../../../../app/actions";
 
-interface MessageWithIdentity extends Message {
-  identity: string;
-  ignore: boolean;
-}
 export default function Conversation() {
   const {
     messages,
@@ -21,10 +16,33 @@ export default function Conversation() {
     setMessages,
     reload,
     stop,
-    isLoading,
   } = useChat({ onFinish: onFinishReceivingMessage });
-  let timeOutRef = useRef<NodeJS.Timeout | null>(null);
+  const createConversationHandlerRef = useRef(async () => {});
+  const timeOutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isConvoCreated, setIsConvoCreated] = useState(false);
+  const { selectedAgents } = useAgents();
+  const [chatIsActive, setChatIsActive] = useState(false);
+  const getCurrentAgent = useMemo(() => {
+    console.log(selectedAgents);
+    return {
+      currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],
+      getNextAgent: function () {
+        const agentValues = Object.values(selectedAgents);
+        console.log(
+          agentValues,
+          agentValues.indexOf(this.currentAgent),
+          agentValues.indexOf(this.currentAgent) + 1,
+          (agentValues.indexOf(this.currentAgent) + 1) % agentValues.length
+        );
+        this.currentAgent =
+          agentValues[
+            (agentValues.indexOf(this.currentAgent) + 1) % agentValues.length
+          ];
+      },
+    };
+  }, [selectedAgents]);
   function onFinishReceivingMessage() {
+    createConversationHandlerRef.current();
     timeOutRef.current = setTimeout(() => {
       getCurrentAgent.getNextAgent();
       setMessages((prevMessages) => {
@@ -41,24 +59,21 @@ export default function Conversation() {
       });
     }, 5000);
   }
-  const { selectedAgents } = useAgents();
-  const getCurrentAgent = useMemo(() => {
-    return {
-      currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],
-      getNextAgent: function () {
-        this.currentAgent =
-          Object.values(selectedAgents)[
-            (Object.values(selectedAgents).indexOf(this.currentAgent) + 1) %
-              Object.values(selectedAgents).length
-          ];
-      },
-    };
-  }, [selectedAgents]);
-  const [chatIsActive, setChatIsActive] = useState(false);
 
-  const [messageSequence, setMessageSequence] = useState<MessageWithIdentity[]>(
-    []
-  );
+  const onCreateConversation = useCallback(async () => {
+    if (!isConvoCreated) {
+      setIsConvoCreated(true);
+      const formData = new FormData();
+      const agentKeys = Object.keys(selectedAgents);
+      formData.append("agent1", selectedAgents[agentKeys[0]].id);
+      formData.append("agent2", selectedAgents[agentKeys[1]].id);
+      formData.append("firstMessage", messages[messages.length - 1].content);
+      await createConversation(formData);
+    }
+  }, [messages, selectedAgents, isConvoCreated]);
+  useEffect(() => {
+    createConversationHandlerRef.current = onCreateConversation;
+  }, [onCreateConversation]);
 
   const handleInputSubmit = () => {
     if (chatIsActive) {

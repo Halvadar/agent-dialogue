@@ -12,7 +12,7 @@ import { Timestamp } from "firebase/firestore";
 
 export default function MenuContent() {
   // We'll need to add a conversations state to AgentsContext later
-  const { agents, conversations } = useAgents();
+  const { conversations } = useAgents();
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, gap: 2 }}>

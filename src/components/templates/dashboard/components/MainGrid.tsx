@@ -54,8 +54,8 @@ export default function MainGrid() {
         <Tab label="My agents" />
       </Tabs>
       <Divider />
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4, xl: 2 }}>
+      <Grid container spacing={3} sx={{}}>
+        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }}>
           <Card
             sx={{
               height: "100%",

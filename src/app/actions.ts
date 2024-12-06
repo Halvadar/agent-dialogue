@@ -33,22 +33,25 @@ export async function createAgent(formData: FormData) {
 
 export async function createConversation(formData: FormData) {
   try {
+    console.log("Creating conversation");
     const decodedToken = await getDecodedTokenServerside();
     const creator = decodedToken.name || decodedToken.email;
     const userId = decodedToken.uid;
     const agent1 = formData.get("agent1");
     const agent2 = formData.get("agent2");
+    const firstMessage = formData.get("firstMessage");
     const date = Timestamp.now();
 
-    const messageBoxRef = collection(db, "messageboxes");
-    await addDoc(messageBoxRef, {
+    const conversationsRef = collection(db, "conversations");
+    await addDoc(conversationsRef, {
       agent1,
       agent2,
       userId,
       creator,
+      firstMessage,
       createdAt: date,
     });
-    revalidateTag("messageboxes");
+    revalidateTag("conversations");
     return { success: true, message: "Message box created successfully" };
   } catch (error) {
     console.error("Error creating agent:", error);
