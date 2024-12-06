@@ -110,8 +110,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (nameError || emailError || passwordError) {
-      event.preventDefault();
       return;
     }
     const data = new FormData(event.currentTarget);
@@ -120,9 +120,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     try {
       const userreg = await createUserWithEmailAndPassword(email, password);
 
-      const user = await signInWithEmailAndPassword(email, password);
-
-      const idToken = await user.getIdToken();
+      const idToken = await userreg.getIdToken();
+      console.log(idToken);
       await fetch("/api/login", {
         headers: {
           Authorization: `Bearer ${idToken}`,
