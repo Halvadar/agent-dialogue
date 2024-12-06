@@ -7,6 +7,7 @@ import {
   collection,
   documentId,
   getDocs,
+  orderBy,
   query,
   where,
 } from "firebase/firestore";
@@ -14,7 +15,9 @@ import { getDecodedTokenServerside } from "../lib/getDecodedTokenServerside";
 import { Conversation } from "../types/messageTypes";
 
 export async function getAgents(): Promise<Agent[]> {
-  const agentsSnapshot = await getDocs(collection(db, "agents"));
+  const agentsSnapshot = await getDocs(
+    query(collection(db, "agents"), orderBy("createdAt", "desc"))
+  );
   const agents = agentsSnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
@@ -26,7 +29,11 @@ export async function getAgents(): Promise<Agent[]> {
 export async function getMyAgents(): Promise<Agent[]> {
   const decodedToken = await getDecodedTokenServerside();
   const agentsSnapshot = await getDocs(
-    query(collection(db, "agents"), where("userId", "==", decodedToken.uid))
+    query(
+      collection(db, "agents"),
+      where("userId", "==", decodedToken.uid),
+      orderBy("createdAt", "desc")
+    )
   );
   const agents = agentsSnapshot.docs.map((doc) => ({
     id: doc.id,
@@ -42,7 +49,8 @@ export async function getConversations(): Promise<Conversation[]> {
   const conversationsSnapshot = await getDocs(
     query(
       collection(db, "conversations"),
-      where("userId", "==", decodedToken.uid)
+      where("userId", "==", decodedToken.uid),
+      orderBy("createdAt", "desc")
     )
   );
   const docs = conversationsSnapshot.docs;

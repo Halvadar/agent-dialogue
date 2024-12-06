@@ -6,11 +6,10 @@ import { revalidateTag } from "next/cache";
 import { getDecodedTokenServerside } from "./lib/getDecodedTokenServerside";
 
 export async function createAgent(formData: FormData) {
-  console.log("Creating agent");
   try {
     const decodedToken = await getDecodedTokenServerside();
     const userId = decodedToken.uid;
-
+    const userName = decodedToken.name || decodedToken.email;
     const name = formData.get("name");
     const instructions = formData.get("instructions");
     const date = Timestamp.now();
@@ -18,6 +17,7 @@ export async function createAgent(formData: FormData) {
       name,
       instructions,
       userId,
+      creator: userName,
       createdAt: date,
     };
 
