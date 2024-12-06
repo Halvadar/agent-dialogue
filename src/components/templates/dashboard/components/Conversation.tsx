@@ -186,7 +186,14 @@ export default function Conversation() {
                       sx={{
                         p: 2,
                         borderRadius: 2,
-                        bgcolor: isFirstAgent ? "#f0f0f0" : "#e3f2fd",
+                        bgcolor: (theme) =>
+                          isFirstAgent
+                            ? theme.palette.mode === "dark"
+                              ? "grey.900"
+                              : "info.light"
+                            : theme.palette.mode === "dark"
+                            ? "grey.500"
+                            : "primary.50",
                         color: "text.primary",
                         maxWidth: "100%",
                         wordBreak: "break-word",

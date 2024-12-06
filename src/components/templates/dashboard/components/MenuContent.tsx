@@ -12,7 +12,6 @@ import { Box, Divider } from "@mui/material";
 export default function MenuContent() {
   // We'll need to add a conversations state to AgentsContext later
   const { conversations } = useAgents();
-  const list = Array.from({ length: 30 }).map(() => conversations[0]);
   return (
     <Stack sx={{ flexGrow: 1, p: 1, pt: 0, overflowY: "auto" }}>
       <Box
@@ -40,7 +39,7 @@ export default function MenuContent() {
           mt: 1,
         }}
       >
-        {list.map((conversation) => (
+        {conversations.map((conversation) => (
           <ListItem key={conversation.id} disablePadding>
             <ListItemButton
               sx={{

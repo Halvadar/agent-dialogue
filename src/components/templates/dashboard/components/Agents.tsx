@@ -24,6 +24,7 @@ interface AgentsProps {
 
 export default function Agents({ currentTab }: AgentsProps) {
   const { selectedAgents, setSelectedAgent, agents, myAgents } = useAgents();
+  console.log(selectedAgents);
   const [openedAgent, setOpenedAgent] = useState<Agent | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -61,9 +62,14 @@ export default function Agents({ currentTab }: AgentsProps) {
               cursor: "pointer",
               transition: "all 0.2s ease-in-out",
               position: "relative",
-              backgroundColor: selectedAgents[agent.id]
-                ? "primary.light"
-                : "background.paper",
+              backgroundColor: (theme) => {
+                console.log(theme.palette.mode, selectedAgents[agent.id]);
+                return selectedAgents[agent.id]
+                  ? theme.palette.mode === "dark"
+                    ? "#434343!important"
+                    : "primary.light"
+                  : "background.paper";
+              },
               "&:hover": {
                 boxShadow: 6,
                 transform: "translateY(-4px)",

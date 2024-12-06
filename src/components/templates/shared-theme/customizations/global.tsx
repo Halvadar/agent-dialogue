@@ -6,17 +6,15 @@ export const globalCustomizations: Components<Theme> = {
     styleOverrides: {
       body: {
         "*::-webkit-scrollbar": {
-          width: 10,
+          width: "8px",
         },
 
         "*::-webkit-scrollbar-track-piece": {
-          backgroundColor: "#FFF",
+          backgroundColor: "background.paper",
         },
 
         "*::-webkit-scrollbar-thumb": {
           backgroundColor: "#CBCBCB",
-          outline: "2px solid #FFF",
-          outlineOffset: -2,
           border: ".1px solid #B7B7B7",
         },
 
