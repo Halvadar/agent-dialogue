@@ -35,7 +35,8 @@ export default function Conversation() {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [messageInterval, setMessageInterval] = useState(5000);
-  const { selectedAgents, chatIsActive, setChatIsActive } = useAgents();
+  const { selectedAgents, chatIsActive, setChatIsActive, unselectAllAgents } =
+    useAgents();
   const getCurrentAgent = useMemo(() => {
     return {
       currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],
@@ -122,6 +123,17 @@ export default function Conversation() {
     }
   };
 
+  const handleNewConversation = () => {
+    setMessages([]);
+    setIsConvoCreated(false);
+    setActiveConversation("");
+    unselectAllAgents();
+    setChatIsActive(false);
+    if (timeOutRef.current) {
+      clearTimeout(timeOutRef.current);
+    }
+  };
+
   return (
     <Paper
       elevation={3}
@@ -143,29 +155,47 @@ export default function Conversation() {
               borderBottom: 1,
               borderColor: "divider",
               display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               gap: 2,
             }}
           >
-            {Object.values(selectedAgents).map((agent) => (
-              <Box
-                key={agent.id}
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {Object.values(selectedAgents).map((agent) => (
                 <Box
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "1.2rem",
-                    border: 1,
-                    p: 1,
-                    borderRadius: 1,
-                    bgcolor: "primary.light",
-                    color: "primary.contrastText",
-                  }}
+                  key={agent.id}
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
-                  {agent.name}
+                  <Box
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1.2rem",
+                      border: 1,
+                      p: 1,
+                      borderRadius: 1,
+                      bgcolor: "primary.light",
+                      color: "primary.contrastText",
+                    }}
+                  >
+                    {agent.name}
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))}
+            </Box>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleNewConversation}
+              disabled={chatIsActive}
+              sx={{
+                bgcolor: "error.light",
+                color: "error.contrastText",
+                minWidth: "auto",
+                whiteSpace: "nowrap",
+              }}
+            >
+              New Conversation
+            </Button>
           </Box>
 
           {/* Messages Area */}

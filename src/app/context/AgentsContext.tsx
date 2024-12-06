@@ -12,6 +12,7 @@ interface AgentsContextType {
   setSelectedAgent: (agent: Agent) => void;
   chatIsActive: boolean;
   setChatIsActive: (isActive: boolean) => void;
+  unselectAllAgents: () => void;
 }
 
 // Create the context with a default value
@@ -43,6 +44,9 @@ export const AgentsProvider: React.FC<{
       return { ...prev, [agent.id]: agent };
     });
   };
+  const unselectAllAgents = () => {
+    setSelectedAgents({});
+  };
 
   return (
     <AgentsContext.Provider
@@ -54,6 +58,7 @@ export const AgentsProvider: React.FC<{
         conversations,
         chatIsActive,
         setChatIsActive,
+        unselectAllAgents,
       }}
     >
       {children}
