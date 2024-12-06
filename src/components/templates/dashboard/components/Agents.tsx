@@ -10,6 +10,7 @@ import {
   IconButton,
   Box,
   Button,
+  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useState } from "react";
@@ -17,6 +18,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useAgents } from "@/app/context/AgentsContext";
 import { Agent } from "@/app/types/agentTypes";
 import { Timestamp } from "firebase/firestore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { deleteAgent } from "@/app/actions";
 
 interface AgentsProps {
   currentTab: number;
@@ -27,6 +30,8 @@ export default function Agents({ currentTab }: AgentsProps) {
     useAgents();
   const [openedAgent, setOpenedAgent] = useState<Agent | null>(null);
   const [open, setOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
   const displayedAgents = currentTab === 0 ? agents : myAgents;
 
   const handleOpen = (agent: Agent) => {
@@ -50,6 +55,24 @@ export default function Agents({ currentTab }: AgentsProps) {
     event.stopPropagation();
     if (!chatIsActive) {
       setSelectedAgent(agent);
+    }
+  };
+
+  const handleDeleteClick = (event: React.MouseEvent, agent: Agent) => {
+    event.stopPropagation();
+    if (!chatIsActive) {
+      setAgentToDelete(agent);
+      setDeleteConfirmOpen(true);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (agentToDelete) {
+      const formData = new FormData();
+      formData.append("agentId", agentToDelete.id);
+      await deleteAgent(formData);
+      setDeleteConfirmOpen(false);
+      setAgentToDelete(null);
     }
   };
 
@@ -116,19 +139,35 @@ export default function Agents({ currentTab }: AgentsProps) {
                   ? new Date(agent.createdAt).toUTCString()
                   : "N/A"}
               </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={(e) => handleAgentSelect(e, agent)}
-                disabled={chatIsActive}
-                sx={{
-                  mt: 2,
-                  width: "100%",
-                  opacity: chatIsActive ? 0.5 : 1,
-                }}
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
               >
-                {selectedAgents[agent.id] ? "Deselect" : "Select"}
-              </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={(e) => handleAgentSelect(e, agent)}
+                  disabled={chatIsActive}
+                  sx={{
+                    flex: 1,
+                    mr: 1,
+                    opacity: chatIsActive ? 0.5 : 1,
+                  }}
+                >
+                  {selectedAgents[agent.id] ? "Deselect" : "Select"}
+                </Button>
+                {currentTab === 1 && ( // Only show delete button for my agents
+                  <IconButton
+                    onClick={(e) => handleDeleteClick(e, agent)}
+                    disabled={chatIsActive}
+                    color="error"
+                    sx={{
+                      opacity: chatIsActive ? 0.5 : 1,
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -212,6 +251,30 @@ export default function Agents({ currentTab }: AgentsProps) {
             </Typography>
           </DialogContent>
         </Card>
+      </Dialog>
+
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        aria-labelledby="delete-dialog-title"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Agent</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete {agentToDelete?.name}? This action
+            cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );

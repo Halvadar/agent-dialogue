@@ -12,6 +12,9 @@ import {
   arrayUnion,
   documentId,
   where,
+  doc,
+  deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import { revalidateTag } from "next/cache";
 import { getDecodedTokenServerside } from "./lib/getDecodedTokenServerside";
@@ -109,5 +112,35 @@ export async function addMessageToConversation(formData: FormData) {
   } catch (error) {
     console.error("Error adding message to conversation:", error);
     return { success: false, message: "Failed to add message to conversation" };
+  }
+}
+
+export async function deleteAgent(formData: FormData) {
+  try {
+    const decodedToken = await getDecodedTokenServerside();
+    const userId = decodedToken.uid;
+    const agentId = formData.get("agentId") as string;
+
+    // Get the agent to verify ownership
+    const agentRef = doc(db, "agents", agentId);
+    const agentSnap = await getDoc(agentRef);
+
+    if (!agentSnap.exists()) {
+      return { success: false, message: "Agent not found" };
+    }
+
+    const agentData = agentSnap.data();
+    if (agentData.userId !== userId) {
+      return { success: false, message: "Unauthorized to delete this agent" };
+    }
+
+    // Delete the agent
+    await deleteDoc(agentRef);
+
+    revalidateTag("agents");
+    return { success: true, message: "Agent deleted successfully" };
+  } catch (error) {
+    console.error("Error deleting agent:", error);
+    return { success: false, message: "Failed to delete agent" };
   }
 }
