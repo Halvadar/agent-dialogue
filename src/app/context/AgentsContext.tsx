@@ -28,7 +28,6 @@ export const AgentsProvider: React.FC<{
     [key: string]: Agent;
   }>({});
   const [chatIsActive, setChatIsActive] = useState(false);
-
   const setSelectedAgent = (agent: Agent) => {
     // if 2 agents are selected, remove the first one
     setSelectedAgents((prev) => {

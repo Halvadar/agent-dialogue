@@ -12,7 +12,7 @@ import { useConversations } from "@/app/context/ConversationContext";
 
 export default function MenuContent() {
   const { activeConversation, setActiveConversation } = useConversations();
-  const { conversations } = useAgents();
+  const { conversations, chatIsActive } = useAgents();
   return (
     <Stack sx={{ flexGrow: 1, p: 1, pt: 0, overflowY: "auto" }}>
       <Box
@@ -43,10 +43,15 @@ export default function MenuContent() {
         {conversations.map((conversation) => (
           <ListItem key={conversation.id} disablePadding>
             <ListItemButton
-              onClick={() => setActiveConversation(conversation.id)}
+              onClick={() =>
+                !chatIsActive && setActiveConversation(conversation.id)
+              }
+              disabled={chatIsActive}
               sx={{
                 borderRadius: 1,
                 mx: 1,
+                cursor: chatIsActive ? "not-allowed" : "pointer",
+                opacity: chatIsActive ? 0.5 : 1,
                 "&:hover": {
                   backgroundColor: "action.hover",
                 },
