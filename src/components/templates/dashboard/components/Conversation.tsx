@@ -1,23 +1,24 @@
 "use client";
 
 import { useAgents } from "@/app/context/AgentsContext";
-import { Box, Card, Typography, TextField, Button, Paper } from "@mui/material";
+import {
+  Box,
+  Card,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  CircularProgress,
+} from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "ai/react";
 import { createConversation } from "@/app/actions";
 import { useConversations } from "@/app/context/ConversationContext";
 
 export default function Conversation() {
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    append,
-    setMessages,
-    reload,
-    stop,
-  } = useChat({ onFinish: onFinishReceivingMessage });
+  const { messages, append, setMessages, reload, stop, isLoading } = useChat({
+    onFinish: onFinishReceivingMessage,
+  });
   const { setActiveConversation } = useConversations();
   const createConversationHandlerRef = useRef(async () => {});
   const timeOutRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,6 +37,12 @@ export default function Conversation() {
       },
     };
   }, [selectedAgents]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   function onFinishReceivingMessage() {
     createConversationHandlerRef.current();
     timeOutRef.current = setTimeout(() => {
@@ -90,7 +97,7 @@ export default function Conversation() {
           { body: { systemMessage: getCurrentAgent.currentAgent.instructions } }
         );
       } else {
-        handleSubmit();
+        onFinishReceivingMessage();
       }
     }
   };
@@ -209,49 +216,44 @@ export default function Conversation() {
                   </Box>
                 );
               })}
+            <div ref={messagesEndRef} />
           </Box>
 
           <Box
             sx={{
+              p: 2,
+              borderTop: 1,
+              borderColor: "divider",
               display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
+              justifyContent: "center",
             }}
           >
-            <Box
+            <Button
+              variant="contained"
+              onClick={handleInputSubmit}
+              disabled={isLoading}
               sx={{
-                p: 2,
-                borderTop: 1,
-                borderColor: "divider",
-                display: "flex",
-                gap: 2,
+                bgcolor: chatIsActive ? "red" : "primary.main",
+                "&:hover": {
+                  bgcolor: chatIsActive ? "darkred" : "primary.dark",
+                },
+                px: 4,
+                py: 1,
               }}
             >
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Type an opening message..."
-                value={input}
-                onChange={handleInputChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleInputSubmit();
-                  }
-                }}
-              />
-              <Button
-                variant="contained"
-                onClick={handleInputSubmit}
-                sx={{
-                  bgcolor: chatIsActive ? "red" : "primary.main",
-                  "&:hover": {
-                    bgcolor: chatIsActive ? "darkred" : "primary.dark",
-                  },
-                }}
-              >
-                {chatIsActive ? "Stop" : "Start"}
-              </Button>
-            </Box>
+              {isLoading ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  <span>Thinking...</span>
+                </Box>
+              ) : chatIsActive ? (
+                "Stop"
+              ) : messages.length > 1 ? (
+                "Continue Conversation"
+              ) : (
+                "Start Conversation"
+              )}
+            </Button>
           </Box>
         </>
       ) : (
