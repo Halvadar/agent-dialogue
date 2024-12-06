@@ -16,16 +16,19 @@ import {
   Slider,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useChat } from "ai/react";
-import { createConversation } from "@/app/actions";
+import { Message, useChat } from "ai/react";
+import { addMessageToConversation, createConversation } from "@/app/actions";
 import { useConversations } from "@/app/context/ConversationContext";
 import SettingsIcon from "@mui/icons-material/Settings";
 
 export default function Conversation() {
+  const onFinishReceivingMessageRef = useRef<
+    ((message: Message) => Promise<void>) | undefined
+  >(undefined);
   const { messages, append, setMessages, reload, stop, isLoading } = useChat({
-    onFinish: onFinishReceivingMessage,
+    onFinish: (message) => onFinishReceivingMessageRef.current!(message),
   });
-  const { setActiveConversation } = useConversations();
+  const { activeConversation, setActiveConversation } = useConversations();
   const createConversationHandlerRef = useRef(async () => {});
   const timeOutRef = useRef<NodeJS.Timeout | null>(null);
   const [isConvoCreated, setIsConvoCreated] = useState(false);
@@ -51,24 +54,33 @@ export default function Conversation() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function onFinishReceivingMessage() {
-    createConversationHandlerRef.current();
-    timeOutRef.current = setTimeout(() => {
-      getCurrentAgent.getNextAgent();
-      setMessages((prevMessages) => {
-        const prevMessagesCopy = [...prevMessages];
+  const onFinishReceivingMessage = useCallback(
+    async (message: Message) => {
+      createConversationHandlerRef.current();
+      if (timeOutRef.current) clearTimeout(timeOutRef.current);
+      timeOutRef.current = setTimeout(async () => {
+        const formData = new FormData();
+        formData.append("conversationId", activeConversation as string);
+        formData.append("content", message.content);
+        formData.append("agentId", getCurrentAgent.currentAgent.id);
+        await addMessageToConversation(formData);
+        getCurrentAgent.getNextAgent();
+        setMessages((prevMessages) => {
+          const prevMessagesCopy = [...prevMessages];
 
-        return prevMessagesCopy.map((m) =>
-          m.role === "assistant" ? { ...m, role: "user" } : m
-        );
-      });
-      reload({
-        body: {
-          systemMessage: getCurrentAgent.currentAgent.instructions,
-        },
-      });
-    }, messageInterval);
-  }
+          return prevMessagesCopy.map((m) =>
+            m.role === "assistant" ? { ...m, role: "user" } : m
+          );
+        });
+        reload({
+          body: {
+            systemMessage: getCurrentAgent.currentAgent.instructions,
+          },
+        });
+      }, messageInterval);
+    },
+    [getCurrentAgent, messageInterval, activeConversation, setMessages, reload]
+  );
 
   const onCreateConversation = useCallback(async () => {
     if (!isConvoCreated) {
@@ -80,13 +92,14 @@ export default function Conversation() {
       formData.append("firstMessage", messages[messages.length - 1].content);
       const conversation = await createConversation(formData);
       if (conversation.success) {
-        setActiveConversation(conversation.id);
+        setActiveConversation(conversation.id!);
       }
     }
   }, [messages, selectedAgents, isConvoCreated, setActiveConversation]);
   useEffect(() => {
     createConversationHandlerRef.current = onCreateConversation;
-  }, [onCreateConversation]);
+    onFinishReceivingMessageRef.current = onFinishReceivingMessage;
+  }, [onCreateConversation, onFinishReceivingMessage]);
 
   const handleInputSubmit = () => {
     if (chatIsActive) {
@@ -104,7 +117,7 @@ export default function Conversation() {
           { body: { systemMessage: getCurrentAgent.currentAgent.instructions } }
         );
       } else {
-        onFinishReceivingMessage();
+        onFinishReceivingMessageRef.current!(messages[messages.length - 1]);
       }
     }
   };

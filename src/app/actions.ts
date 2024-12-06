@@ -1,7 +1,18 @@
 "use server";
 
 import { db } from "@/app/lib/firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  updateDoc,
+  getDocs,
+  query,
+  orderBy,
+  arrayUnion,
+  documentId,
+  where,
+} from "firebase/firestore";
 import { revalidateTag } from "next/cache";
 import { getDecodedTokenServerside } from "./lib/getDecodedTokenServerside";
 
@@ -49,6 +60,7 @@ export async function createConversation(formData: FormData) {
       userId,
       creator,
       firstMessage,
+      messages: [{ content: firstMessage, agentId: agent1Id, createdAt: date }],
       createdAt: date,
     });
     revalidateTag("conversations");
@@ -60,5 +72,43 @@ export async function createConversation(formData: FormData) {
   } catch (error) {
     console.error("Error creating agent:", error);
     return { success: false, message: "Failed to create agent" };
+  }
+}
+
+export async function addMessageToConversation(formData: FormData) {
+  try {
+    await getDecodedTokenServerside();
+    const conversationId = formData.get("conversationId");
+
+    if (!conversationId) {
+      return { success: false, message: "Conversation ID is required" };
+    }
+
+    const content = formData.get("content");
+    const agentId = formData.get("agentId");
+    const date = Timestamp.now();
+
+    const convoDoc = await getDocs(
+      query(
+        collection(db, "conversations"),
+        where(documentId(), "==", conversationId),
+        orderBy("createdAt", "desc")
+      )
+    );
+    console.log(conversationId);
+    if (convoDoc.docs.length === 0) {
+      return { success: false, message: "Conversation not found" };
+    }
+
+    const doc = convoDoc.docs[0];
+    const convoRef = doc.ref;
+    await updateDoc(convoRef, {
+      messages: arrayUnion({ content, agentId, createdAt: date }),
+    });
+
+    return { success: true, message: "Message added successfully" };
+  } catch (error) {
+    console.error("Error adding message to conversation:", error);
+    return { success: false, message: "Failed to add message to conversation" };
   }
 }
