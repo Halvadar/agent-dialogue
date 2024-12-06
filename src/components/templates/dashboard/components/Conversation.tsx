@@ -135,7 +135,7 @@ export default function Conversation() {
         maxWidth: { xs: "100%", md: "40%" },
       }}
     >
-      {Object.keys(selectedAgents).length > 0 ? (
+      {Object.keys(selectedAgents).length > 1 ? (
         <>
           <Box
             sx={{

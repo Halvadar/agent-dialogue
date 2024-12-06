@@ -44,7 +44,6 @@ export async function createAgent(formData: FormData) {
 
 export async function createConversation(formData: FormData) {
   try {
-    console.log("Creating conversation");
     const decodedToken = await getDecodedTokenServerside();
     const creator = decodedToken.name || decodedToken.email;
     const userId = decodedToken.uid;
