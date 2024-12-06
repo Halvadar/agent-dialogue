@@ -32,10 +32,10 @@ export default function Conversation() {
   const createConversationHandlerRef = useRef(async () => {});
   const timeOutRef = useRef<NodeJS.Timeout | null>(null);
   const [isConvoCreated, setIsConvoCreated] = useState(false);
-  const { selectedAgents } = useAgents();
-  const [chatIsActive, setChatIsActive] = useState(false);
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [messageInterval, setMessageInterval] = useState(5000);
+  const { selectedAgents, chatIsActive, setChatIsActive } = useAgents();
   const getCurrentAgent = useMemo(() => {
     return {
       currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],

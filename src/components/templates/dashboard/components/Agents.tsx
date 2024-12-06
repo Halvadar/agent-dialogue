@@ -23,7 +23,8 @@ interface AgentsProps {
 }
 
 export default function Agents({ currentTab }: AgentsProps) {
-  const { selectedAgents, setSelectedAgent, agents, myAgents } = useAgents();
+  const { selectedAgents, setSelectedAgent, agents, myAgents, chatIsActive } =
+    useAgents();
   const [openedAgent, setOpenedAgent] = useState<Agent | null>(null);
   const [open, setOpen] = useState(false);
   const displayedAgents = currentTab === 0 ? agents : myAgents;
@@ -47,7 +48,9 @@ export default function Agents({ currentTab }: AgentsProps) {
 
   const handleAgentSelect = (event: React.MouseEvent, agent: Agent) => {
     event.stopPropagation();
-    setSelectedAgent(agent);
+    if (!chatIsActive) {
+      setSelectedAgent(agent);
+    }
   };
 
   return (
@@ -57,7 +60,7 @@ export default function Agents({ currentTab }: AgentsProps) {
           <Card
             sx={{
               height: "100%",
-              cursor: "pointer",
+              cursor: chatIsActive ? "not-allowed" : "pointer",
               transition: "all 0.2s ease-in-out",
               position: "relative",
               backgroundColor: (theme) => {
@@ -72,7 +75,7 @@ export default function Agents({ currentTab }: AgentsProps) {
                 transform: "translateY(-4px)",
               },
             }}
-            onClick={(e) => handleCardClick(e, agent)}
+            onClick={(e) => !chatIsActive && handleCardClick(e, agent)}
           >
             <CardContent
               sx={{
@@ -117,9 +120,11 @@ export default function Agents({ currentTab }: AgentsProps) {
                 variant="contained"
                 color="primary"
                 onClick={(e) => handleAgentSelect(e, agent)}
+                disabled={chatIsActive}
                 sx={{
                   mt: 2,
                   width: "100%",
+                  opacity: chatIsActive ? 0.5 : 1,
                 }}
               >
                 {selectedAgents[agent.id] ? "Deselect" : "Select"}

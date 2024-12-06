@@ -10,6 +10,8 @@ interface AgentsContextType {
   selectedAgents: { [key: string]: Agent };
   conversations: Conversation[];
   setSelectedAgent: (agent: Agent) => void;
+  chatIsActive: boolean;
+  setChatIsActive: (isActive: boolean) => void;
 }
 
 // Create the context with a default value
@@ -25,6 +27,7 @@ export const AgentsProvider: React.FC<{
   const [selectedAgents, setSelectedAgents] = useState<{
     [key: string]: Agent;
   }>({});
+  const [chatIsActive, setChatIsActive] = useState(false);
 
   const setSelectedAgent = (agent: Agent) => {
     // if 2 agents are selected, remove the first one
@@ -50,6 +53,8 @@ export const AgentsProvider: React.FC<{
         agents,
         myAgents,
         conversations,
+        chatIsActive,
+        setChatIsActive,
       }}
     >
       {children}
