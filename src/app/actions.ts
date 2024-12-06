@@ -43,7 +43,7 @@ export async function createConversation(formData: FormData) {
     const date = Timestamp.now();
 
     const conversationsRef = collection(db, "conversations");
-    await addDoc(conversationsRef, {
+    const docRef = await addDoc(conversationsRef, {
       agent1Id,
       agent2Id,
       userId,
@@ -52,7 +52,11 @@ export async function createConversation(formData: FormData) {
       createdAt: date,
     });
     revalidateTag("conversations");
-    return { success: true, message: "Message box created successfully" };
+    return {
+      success: true,
+      message: "Conversation created successfully",
+      id: docRef.id,
+    };
   } catch (error) {
     console.error("Error creating agent:", error);
     return { success: false, message: "Failed to create agent" };

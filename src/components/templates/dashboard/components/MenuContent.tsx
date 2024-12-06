@@ -8,9 +8,11 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useAgents } from "@/app/context/AgentsContext";
 import { Box, Divider } from "@mui/material";
+import { useConversations } from "@/app/context/ConversationContext";
 
 export default function MenuContent() {
-  // We'll need to add a conversations state to AgentsContext later
+  const { activeConversation, setActiveConversation } = useConversations();
+  console.log(activeConversation);
   const { conversations } = useAgents();
   return (
     <Stack sx={{ flexGrow: 1, p: 1, pt: 0, overflowY: "auto" }}>
@@ -42,13 +44,17 @@ export default function MenuContent() {
         {conversations.map((conversation) => (
           <ListItem key={conversation.id} disablePadding>
             <ListItemButton
+              onClick={() => setActiveConversation(conversation.id)}
               sx={{
                 borderRadius: 1,
                 mx: 1,
                 "&:hover": {
                   backgroundColor: "action.hover",
                 },
-                backgroundColor: "background.paper",
+                backgroundColor:
+                  activeConversation === conversation.id
+                    ? "action.selected"
+                    : "background.paper",
               }}
             >
               <ListItemText
@@ -58,6 +64,8 @@ export default function MenuContent() {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
+                    fontWeight:
+                      activeConversation === conversation.id ? 600 : 400,
                   },
                 }}
               />

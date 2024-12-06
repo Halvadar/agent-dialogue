@@ -4,7 +4,8 @@ import { useAgents } from "@/app/context/AgentsContext";
 import { Box, Card, Typography, TextField, Button, Paper } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "ai/react";
-import { createConversation } from "../../../../app/actions";
+import { createConversation } from "@/app/actions";
+import { useConversations } from "@/app/context/ConversationContext";
 
 export default function Conversation() {
   const {
@@ -17,23 +18,17 @@ export default function Conversation() {
     reload,
     stop,
   } = useChat({ onFinish: onFinishReceivingMessage });
+  const { setActiveConversation } = useConversations();
   const createConversationHandlerRef = useRef(async () => {});
   const timeOutRef = useRef<NodeJS.Timeout | null>(null);
   const [isConvoCreated, setIsConvoCreated] = useState(false);
   const { selectedAgents } = useAgents();
   const [chatIsActive, setChatIsActive] = useState(false);
   const getCurrentAgent = useMemo(() => {
-    console.log(selectedAgents);
     return {
       currentAgent: selectedAgents[Object.keys(selectedAgents)[0]],
       getNextAgent: function () {
         const agentValues = Object.values(selectedAgents);
-        console.log(
-          agentValues,
-          agentValues.indexOf(this.currentAgent),
-          agentValues.indexOf(this.currentAgent) + 1,
-          (agentValues.indexOf(this.currentAgent) + 1) % agentValues.length
-        );
         this.currentAgent =
           agentValues[
             (agentValues.indexOf(this.currentAgent) + 1) % agentValues.length
@@ -68,9 +63,13 @@ export default function Conversation() {
       formData.append("agent1Id", selectedAgents[agentKeys[0]].id);
       formData.append("agent2Id", selectedAgents[agentKeys[1]].id);
       formData.append("firstMessage", messages[messages.length - 1].content);
-      await createConversation(formData);
+      const conversation = await createConversation(formData);
+      console.log(conversation);
+      if (conversation.success) {
+        setActiveConversation(conversation.id);
+      }
     }
-  }, [messages, selectedAgents, isConvoCreated]);
+  }, [messages, selectedAgents, isConvoCreated, setActiveConversation]);
   useEffect(() => {
     createConversationHandlerRef.current = onCreateConversation;
   }, [onCreateConversation]);
