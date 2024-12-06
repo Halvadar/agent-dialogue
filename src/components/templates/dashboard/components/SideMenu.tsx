@@ -34,8 +34,12 @@ export default function SideMenu() {
       variant="permanent"
       sx={{
         display: { xs: "none", md: "block" },
+
         [`& .${drawerClasses.paper}`]: {
+          display: "flex",
+          flexDirection: "column",
           backgroundColor: "background.paper",
+          width: "260px",
         },
       }}
     >

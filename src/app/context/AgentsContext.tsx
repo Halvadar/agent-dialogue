@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useState, ReactNode } from "react";
-import { Agent, Conversation } from "../types/agents";
+import { Agent } from "../types/agentTypes";
+import { Conversation } from "../types/messageTypes";
 
 // Define the shape of the context state
 interface AgentsContextType {

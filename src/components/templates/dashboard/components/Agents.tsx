@@ -15,7 +15,7 @@ import Grid from "@mui/material/Grid2";
 import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAgents } from "@/app/context/AgentsContext";
-import { Agent } from "@/app/types/agents";
+import { Agent } from "@/app/types/agentTypes";
 import { Timestamp } from "firebase/firestore";
 
 interface AgentsProps {

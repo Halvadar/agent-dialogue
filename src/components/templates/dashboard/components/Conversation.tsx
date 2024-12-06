@@ -65,8 +65,8 @@ export default function Conversation() {
       setIsConvoCreated(true);
       const formData = new FormData();
       const agentKeys = Object.keys(selectedAgents);
-      formData.append("agent1", selectedAgents[agentKeys[0]].id);
-      formData.append("agent2", selectedAgents[agentKeys[1]].id);
+      formData.append("agent1Id", selectedAgents[agentKeys[0]].id);
+      formData.append("agent2Id", selectedAgents[agentKeys[1]].id);
       formData.append("firstMessage", messages[messages.length - 1].content);
       await createConversation(formData);
     }

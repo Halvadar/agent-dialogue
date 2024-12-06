@@ -6,6 +6,7 @@ import { Roboto } from "next/font/google";
 
 import AppTheme from "@/components/templates/shared-theme/AppTheme";
 import { AuthContextProvider } from "./context/AuthContext";
+import { CssBaseline } from "@mui/material";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -41,6 +42,7 @@ export default function RootLayout({
       >
         <AppRouterCacheProvider>
           <AppTheme>
+            <CssBaseline enableColorScheme />
             <AuthContextProvider>{children}</AuthContextProvider>
           </AppTheme>
         </AppRouterCacheProvider>

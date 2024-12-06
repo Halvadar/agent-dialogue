@@ -37,15 +37,15 @@ export async function createConversation(formData: FormData) {
     const decodedToken = await getDecodedTokenServerside();
     const creator = decodedToken.name || decodedToken.email;
     const userId = decodedToken.uid;
-    const agent1 = formData.get("agent1");
-    const agent2 = formData.get("agent2");
+    const agent1Id = formData.get("agent1Id");
+    const agent2Id = formData.get("agent2Id");
     const firstMessage = formData.get("firstMessage");
     const date = Timestamp.now();
 
     const conversationsRef = collection(db, "conversations");
     await addDoc(conversationsRef, {
-      agent1,
-      agent2,
+      agent1Id,
+      agent2Id,
       userId,
       creator,
       firstMessage,
