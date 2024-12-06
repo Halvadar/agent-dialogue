@@ -10,6 +10,7 @@ interface AgentsContextType {
   selectedAgents: { [key: string]: Agent };
   conversations: Conversation[];
   setSelectedAgent: (agent: Agent) => void;
+  setSelectedAgents: (agents: { [key: string]: Agent }) => void;
   chatIsActive: boolean;
   setChatIsActive: (isActive: boolean) => void;
   unselectAllAgents: () => void;
@@ -59,6 +60,7 @@ export const AgentsProvider: React.FC<{
         chatIsActive,
         setChatIsActive,
         unselectAllAgents,
+        setSelectedAgents,
       }}
     >
       {children}

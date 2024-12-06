@@ -69,6 +69,7 @@ export async function getConversations(): Promise<Conversation[]> {
       }, [])
     ),
   ];
+  console.log(agentIds);
   const agentsSnapshot = await getDocs(
     query(collection(db, "agents"), where(documentId(), "in", agentIds))
   );

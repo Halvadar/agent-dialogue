@@ -9,10 +9,28 @@ import Typography from "@mui/material/Typography";
 import { useAgents } from "@/app/context/AgentsContext";
 import { Box, Divider } from "@mui/material";
 import { useConversations } from "@/app/context/ConversationContext";
+import { Message } from "ai/react";
+import { Conversation } from "../../../../app/types/messageTypes";
+import { useAIChat } from "../../../../app/context/AIChatContext";
 
 export default function MenuContent() {
   const { activeConversation, setActiveConversation } = useConversations();
-  const { conversations, chatIsActive } = useAgents();
+  const { conversations, chatIsActive, setSelectedAgents } = useAgents();
+  const { setMessages } = useAIChat({});
+
+  const handleConversationClick = (conversation: Conversation) => {
+    setMessages(
+      (conversation.messages?.map((msg) => ({
+        role: msg.agentId === conversation.agent1.id ? "user" : "assistant",
+        content: msg.content,
+      })) as Message[]) || []
+    );
+    setActiveConversation(conversation.id);
+    setSelectedAgents({
+      [conversation.agent1.id]: conversation.agent1,
+      [conversation.agent2.id]: conversation.agent2,
+    });
+  };
   return (
     <Stack sx={{ flexGrow: 1, p: 1, pt: 0, overflowY: "auto" }}>
       <Box
@@ -44,7 +62,7 @@ export default function MenuContent() {
           <ListItem key={conversation.id} disablePadding>
             <ListItemButton
               onClick={() =>
-                !chatIsActive && setActiveConversation(conversation.id)
+                !chatIsActive && handleConversationClick(conversation)
               }
               disabled={chatIsActive}
               sx={{

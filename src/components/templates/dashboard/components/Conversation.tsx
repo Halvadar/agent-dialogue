@@ -20,12 +20,13 @@ import { Message, useChat } from "ai/react";
 import { addMessageToConversation, createConversation } from "@/app/actions";
 import { useConversations } from "@/app/context/ConversationContext";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { useAIChat } from "../../../../app/context/AIChatContext";
 
 export default function Conversation() {
   const onFinishReceivingMessageRef = useRef<
     ((message: Message) => Promise<void>) | undefined
   >(undefined);
-  const { messages, append, setMessages, reload, stop, isLoading } = useChat({
+  const { messages, append, setMessages, reload, stop, isLoading } = useAIChat({
     onFinish: (message) => onFinishReceivingMessageRef.current!(message),
   });
   const { activeConversation, setActiveConversation } = useConversations();
@@ -304,7 +305,7 @@ export default function Conversation() {
                 </Box>
               ) : chatIsActive ? (
                 "Stop"
-              ) : messages.length > 1 ? (
+              ) : messages.length >= 1 ? (
                 "Continue Conversation"
               ) : (
                 "Start Conversation"
