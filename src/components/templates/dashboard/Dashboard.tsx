@@ -13,7 +13,15 @@ export default function Dashboard(props: { disableCustomTheme?: boolean }) {
       <AIChatProvider>
         <DashboardClient {...props}>
           <Header />
-          <Box sx={{ flex: 1, display: "flex", gap: 2, width: "100%" }}>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              gap: 2,
+              width: "100%",
+              maxHeight: "calc(100vh - 50px)",
+            }}
+          >
             <Conversation />
             <MainGrid />
           </Box>

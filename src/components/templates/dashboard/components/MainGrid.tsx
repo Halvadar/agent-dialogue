@@ -49,12 +49,19 @@ export default function MainGrid() {
         flex: 1,
       }}
     >
-      <Tabs value={tabValue} onChange={handleTabChange}>
+      <Tabs value={tabValue} onChange={handleTabChange} sx={{ flexShrink: 0 }}>
         <Tab label="All agents" />
         <Tab label="My agents" />
       </Tabs>
       <Divider />
-      <Grid container spacing={3} sx={{}}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          overflowY: "auto",
+          pr: 1,
+        }}
+      >
         <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }}>
           <Card
             sx={{
@@ -163,16 +170,6 @@ export default function MainGrid() {
           </Box>
         </Card>
       </Dialog>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          alignItems: "flex-end",
-          flex: 1,
-          gap: 1,
-        }}
-      ></Box>
     </Paper>
   );
 }
