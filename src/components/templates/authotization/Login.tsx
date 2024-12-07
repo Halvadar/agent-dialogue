@@ -18,6 +18,7 @@ import { signInWithEmailAndPassword, signInWithGoogle } from "@/app/lib/auth";
 import { useRouter } from "next/navigation";
 import { TextField } from "@mui/material";
 import AuthTheme from "../shared-theme/AuthTheme";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -70,6 +71,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [error, setError] = React.useState("");
   const router = useRouter();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -81,10 +83,12 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (emailError || passwordError) {
+
+    if (!validateInputs()) {
       return;
     }
 
+    setIsLoading(true);
     const data = new FormData(event.currentTarget);
     const email = data.get("email") as string;
     const password = data.get("password") as string;
@@ -99,6 +103,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       router.push("/dashboard");
     } catch (e) {
       setError((e as Error).message);
+      setIsLoading(false);
     }
   };
 
@@ -129,6 +134,14 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     return isValid;
   };
 
+  const clearErrors = () => {
+    setError("");
+    setEmailError(false);
+    setEmailErrorMessage("");
+    setPasswordError(false);
+    setPasswordErrorMessage("");
+  };
+
   return (
     <AuthTheme {...props}>
       <SignInContainer direction="column" justifyContent="space-between">
@@ -151,7 +164,10 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               gap: 2,
             }}
           >
-            <FormControl>
+            <Box sx={{ minHeight: "32px" }}>
+              {error && <Typography color="error">{error}</Typography>}
+            </Box>
+            <FormControl sx={{ minHeight: "80px" }}>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
                 error={emailError}
@@ -168,7 +184,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 color={emailError ? "error" : "primary"}
               />
             </FormControl>
-            <FormControl>
+            <FormControl sx={{ minHeight: "80px" }}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
                 error={passwordError}
@@ -194,14 +210,23 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              onClick={clearErrors}
+              disabled={isLoading}
+              startIcon={
+                isLoading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : null
+              }
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
             <Link
               component="button"
               type="button"
-              onClick={handleClickOpen}
+              onClick={() => {
+                clearErrors();
+                handleClickOpen();
+              }}
               variant="body2"
               sx={{ alignSelf: "center" }}
             >
@@ -214,6 +239,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               fullWidth
               variant="outlined"
               onClick={async () => {
+                clearErrors();
+                setIsLoading(true);
                 try {
                   const user = await signInWithGoogle();
                   const idToken = await user.getIdToken();
@@ -225,11 +252,19 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                   router.push("/dashboard");
                 } catch (error) {
                   setError((error as Error).message);
+                  setIsLoading(false);
                 }
               }}
-              startIcon={<GoogleIcon />}
+              disabled={isLoading}
+              startIcon={
+                isLoading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <GoogleIcon />
+                )
+              }
             >
-              Sign in with Google
+              {isLoading ? "Signing in..." : "Sign in with Google"}
             </Button>
 
             <Typography sx={{ textAlign: "center" }}>

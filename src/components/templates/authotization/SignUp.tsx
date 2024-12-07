@@ -15,11 +15,11 @@ import { GoogleIcon } from "./CustomIcons";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   signInWithGoogle,
 } from "@/app/lib/auth";
 import AuthTheme from "../shared-theme/AuthTheme";
 import { useRouter } from "next/navigation";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -72,6 +72,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState("");
   const [error, setError] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
   const validateInputs = () => {
     const email = document.getElementById("email") as HTMLInputElement;
     const password = document.getElementById("password") as HTMLInputElement;
@@ -111,15 +112,23 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (nameError || emailError || passwordError) {
+
+    if (!validateInputs()) {
       return;
     }
+
+    setIsLoading(true);
     const data = new FormData(event.currentTarget);
     const email = data.get("email") as string;
     const password = data.get("password") as string;
-    try {
-      const userreg = await createUserWithEmailAndPassword(email, password);
+    const name = data.get("name") as string;
 
+    try {
+      const userreg = await createUserWithEmailAndPassword(
+        email,
+        password,
+        name
+      );
       const idToken = await userreg.getIdToken();
       await fetch("/api/login", {
         headers: {
@@ -129,7 +138,18 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       router.push("/dashboard");
     } catch (e) {
       setError((e as Error).message);
+      setIsLoading(false);
     }
+  };
+
+  const clearErrors = () => {
+    setError("");
+    setEmailError(false);
+    setEmailErrorMessage("");
+    setPasswordError(false);
+    setPasswordErrorMessage("");
+    setNameError(false);
+    setNameErrorMessage("");
   };
 
   return (
@@ -147,9 +167,16 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
           >
-            <FormControl>
+            <Box sx={{ minHeight: "32px" }}>
+              {error && <Typography color="error">{error}</Typography>}
+            </Box>
+            <FormControl sx={{ minHeight: "80px" }}>
               <FormLabel htmlFor="name">Full name</FormLabel>
               <TextField
                 autoComplete="name"
@@ -163,7 +190,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={nameError ? "error" : "primary"}
               />
             </FormControl>
-            <FormControl>
+            <FormControl sx={{ minHeight: "80px" }}>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
                 required
@@ -178,7 +205,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 color={passwordError ? "error" : "primary"}
               />
             </FormControl>
-            <FormControl>
+            <FormControl sx={{ minHeight: "80px" }}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
                 required
@@ -199,9 +226,15 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              onClick={clearErrors}
+              disabled={isLoading}
+              startIcon={
+                isLoading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : null
+              }
             >
-              Sign up
+              {isLoading ? "Signing up..." : "Sign up"}
             </Button>
           </Box>
           <Divider>
@@ -212,6 +245,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
               fullWidth
               variant="outlined"
               onClick={async () => {
+                clearErrors();
+                setIsLoading(true);
                 try {
                   const user = await signInWithGoogle();
                   const idToken = await user.getIdToken();
@@ -223,11 +258,19 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                   router.push("/dashboard");
                 } catch (error) {
                   setError((error as Error).message);
+                  setIsLoading(false);
                 }
               }}
-              startIcon={<GoogleIcon />}
+              disabled={isLoading}
+              startIcon={
+                isLoading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <GoogleIcon />
+                )
+              }
             >
-              Sign up with Google
+              {isLoading ? "Signing up..." : "Sign up with Google"}
             </Button>
 
             <Typography sx={{ textAlign: "center" }}>
