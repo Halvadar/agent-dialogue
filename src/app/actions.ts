@@ -6,12 +6,7 @@ import {
   addDoc,
   Timestamp,
   updateDoc,
-  getDocs,
-  query,
-  orderBy,
   arrayUnion,
-  documentId,
-  where,
   doc,
   deleteDoc,
   getDoc,
@@ -89,24 +84,16 @@ export async function addMessageToConversation(formData: FormData) {
     const content = formData.get("content");
     const agentId = formData.get("agentId");
     const date = Timestamp.now();
+    const convoRef = doc(db, "conversations", conversationId as string);
 
-    const convoDoc = await getDocs(
-      query(
-        collection(db, "conversations"),
-        where(documentId(), "==", conversationId),
-        orderBy("createdAt", "desc")
-      )
-    );
-    console.log(conversationId);
-    if (convoDoc.docs.length === 0) {
-      return { success: false, message: "Conversation not found" };
-    }
-
-    const doc = convoDoc.docs[0];
-    const convoRef = doc.ref;
     await updateDoc(convoRef, {
-      messages: arrayUnion({ content, agentId, createdAt: date }),
+      messages: arrayUnion({
+        content,
+        agentId,
+        createdAt: date,
+      }),
     });
+    revalidateTag("conversations");
 
     return { success: true, message: "Message added successfully" };
   } catch (error) {

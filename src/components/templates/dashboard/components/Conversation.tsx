@@ -59,13 +59,13 @@ export default function Conversation() {
   const onFinishReceivingMessage = useCallback(
     async (message: Message) => {
       createConversationHandlerRef.current();
+      const formData = new FormData();
+      formData.append("conversationId", activeConversation as string);
+      formData.append("content", message.content);
+      formData.append("agentId", getCurrentAgent.currentAgent.id);
+      await addMessageToConversation(formData);
       if (timeOutRef.current) clearTimeout(timeOutRef.current);
       timeOutRef.current = setTimeout(async () => {
-        const formData = new FormData();
-        formData.append("conversationId", activeConversation as string);
-        formData.append("content", message.content);
-        formData.append("agentId", getCurrentAgent.currentAgent.id);
-        await addMessageToConversation(formData);
         getCurrentAgent.getNextAgent();
         setMessages((prevMessages) => {
           const prevMessagesCopy = [...prevMessages];
