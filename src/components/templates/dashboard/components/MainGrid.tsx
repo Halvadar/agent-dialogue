@@ -19,10 +19,7 @@ export default function MainGrid() {
   const [tabValue, setTabValue] = React.useState(0);
   const [open, setOpen] = React.useState(false);
 
-  const handleTabChange = (
-    event: React.ChangeEvent<unknown>,
-    newValue: number
-  ) => {
+  const handleTabChange = (_: React.ChangeEvent<unknown>, newValue: number) => {
     setTabValue(newValue);
   };
 

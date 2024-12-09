@@ -30,12 +30,17 @@ export const AIChatProvider: React.FC<
 export const useAIChat = (options: {
   [key: string]: (...args: any[]) => void | Promise<void>;
 }) => {
-  const optionsRef = useRef(options);
   useEffect(() => {
-    Object.entries(optionsRef.current).forEach(([key, func]) => {
+    const optionsRef = options;
+    Object.entries(optionsRef).forEach(([key, func]) => {
       callbacks[key] = !callbacks[key] ? [func] : [...callbacks[key], func];
     });
-  }, []);
+    return () => {
+      Object.entries(optionsRef).forEach(([key, func]) => {
+        callbacks[key] = callbacks[key].filter((f) => f !== func);
+      });
+    };
+  }, [options]);
 
   const context = React.useContext(AIChatContext);
   if (!context) {
