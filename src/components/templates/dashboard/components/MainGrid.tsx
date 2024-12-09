@@ -14,8 +14,10 @@ import IconButton from "@mui/material/IconButton";
 import { Box, Button, Dialog } from "@mui/material";
 import { createAgent } from "@/app/actions";
 import Agents from "./Agents";
+import { useAgents } from "@/app/context/AgentsContext";
 
 export default function MainGrid() {
+  const { selectedAgents } = useAgents();
   const [tabValue, setTabValue] = React.useState(0);
   const [open, setOpen] = React.useState(false);
 
@@ -38,11 +40,14 @@ export default function MainGrid() {
       elevation={3}
       sx={{
         alignSelf: "stretch",
-        display: "flex",
         flexDirection: "column",
         gap: 2,
         p: 3,
-        maxWidth: { sm: "100%", md: "60%" },
+        display: {
+          xs: Object.keys(selectedAgents).length < 2 ? "flex" : "none",
+          lg: "flex",
+        },
+        maxWidth: { md: "100%", lg: "60%" },
         flex: 1,
       }}
     >

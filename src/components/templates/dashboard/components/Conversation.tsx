@@ -139,13 +139,16 @@ export default function Conversation() {
     <Paper
       elevation={3}
       sx={{
-        flexGrow: 1,
-        alignSelf: "stretch",
+        display: {
+          xs: Object.keys(selectedAgents).length > 1 ? "flex" : "none",
+          lg: "flex",
+        },
         flexDirection: "column",
-        gap: 2,
-        p: 3,
-        display: { xs: "none", md: "flex" },
-        maxWidth: { xs: "100%", md: "40%" },
+        width: {
+          xs: "100%",
+          lg: "40%",
+        },
+        overflow: "hidden",
       }}
     >
       {Object.keys(selectedAgents).length > 1 ? (
@@ -315,7 +318,7 @@ export default function Conversation() {
           </Box>
         </>
       ) : (
-        <Card sx={{ p: 4, textAlign: "center", mt: 2 }}>
+        <Card sx={{ p: 4, textAlign: "center", m: 2 }}>
           <Typography variant="h6">
             Please select two agents to start a conversation
           </Typography>
