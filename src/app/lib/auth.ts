@@ -47,12 +47,17 @@ export const signInWithEmailAndPassword = async (
     return result.user;
   } catch (err) {
     const error = err as FirebaseError;
-    if (error?.code === "auth/wrong-password") {
-      throw new Error("Invalid password");
-    } else if (error?.code === "auth/user-not-found") {
-      throw new Error("User not found");
+
+    switch (error?.code) {
+      case "auth/invalid-credential":
+        throw new Error("Invalid credentials");
+      case "auth/wrong-password":
+        throw new Error("Invalid password");
+      case "auth/user-not-found":
+        throw new Error("User not found");
+      default:
+        throw new Error("Something went wrong");
     }
-    throw new Error("Something went wrong");
   }
 };
 
