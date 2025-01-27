@@ -72,16 +72,37 @@ export default function SideMenu() {
           sizes="small"
           alt="Riley Carter"
           src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
+          sx={{ width: 36, height: 36, flexShrink: 0 }}
         />
-        <Box sx={{ mr: "auto" }}>
+        <Box
+          sx={{
+            mr: "auto",
+            minWidth: 0,
+            overflow: "hidden",
+          }}
+        >
           <Typography
             variant="body2"
-            sx={{ fontWeight: 500, lineHeight: "16px" }}
+            sx={{
+              fontWeight: 500,
+              lineHeight: "16px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
           >
             {user?.displayName || "Unknown User"}
           </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: "block",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
             {user?.email || "Unknown User"}
           </Typography>
         </Box>
