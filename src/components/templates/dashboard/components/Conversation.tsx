@@ -16,7 +16,7 @@ import {
   Slider,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Message, useChat } from "ai/react";
+import { Message } from "ai/react";
 import { addMessageToConversation, createConversation } from "@/app/actions";
 import { useConversations } from "@/app/context/ConversationContext";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -55,6 +55,23 @@ export default function Conversation() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && chatIsActive) {
+        stop();
+        setChatIsActive(false);
+        if (timeOutRef.current) {
+          clearTimeout(timeOutRef.current);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [chatIsActive, setChatIsActive, stop]);
 
   const onFinishReceivingMessage = useCallback(
     async (message: Message) => {
