@@ -8,7 +8,6 @@ import {
   Button,
   Paper,
   CircularProgress,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -16,11 +15,12 @@ import {
   Slider,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Message, useChat } from "ai/react";
+import { Message } from "ai/react";
 import { addMessageToConversation, createConversation } from "@/app/actions";
 import { useConversations } from "@/app/context/ConversationContext";
-import SettingsIcon from "@mui/icons-material/Settings";
 import { useAIChat } from "../../../../app/context/AIChatContext";
+import ModelSelector from "./ModelSelector";
+import { useModelProvider } from "../../../../app/context/ModelProviderContext";
 
 export default function Conversation() {
   const onFinishReceivingMessageRef = useRef<
@@ -29,6 +29,7 @@ export default function Conversation() {
   const { messages, append, setMessages, reload, stop, isLoading } = useAIChat({
     onFinish: (message) => onFinishReceivingMessageRef.current!(message),
   });
+  const { model } = useModelProvider();
   const { activeConversation, setActiveConversation } = useConversations();
   const createConversationHandlerRef = useRef(async () => {});
   const timeOutRef = useRef<NodeJS.Timeout | null>(null);
@@ -81,11 +82,19 @@ export default function Conversation() {
         reload({
           body: {
             systemMessage: getCurrentAgent.currentAgent.instructions,
+            model: model,
           },
         });
       }, messageInterval);
     },
-    [getCurrentAgent, messageInterval, activeConversation, setMessages, reload]
+    [
+      getCurrentAgent,
+      messageInterval,
+      activeConversation,
+      setMessages,
+      reload,
+      model,
+    ]
   );
 
   const onCreateConversation = useCallback(async () => {
@@ -120,7 +129,12 @@ export default function Conversation() {
             role: "system",
             content: "Introduce yourself and ask a question.",
           },
-          { body: { systemMessage: getCurrentAgent.currentAgent.instructions } }
+          {
+            body: {
+              systemMessage: getCurrentAgent.currentAgent.instructions,
+              model: model,
+            },
+          }
         );
       } else {
         onFinishReceivingMessageRef.current!(messages[messages.length - 1]);
@@ -203,6 +217,33 @@ export default function Conversation() {
               }}
             >
               New Conversation
+            </Button>
+          </Box>
+
+          <Box
+            sx={{
+              p: 2,
+              borderBottom: 1,
+              borderColor: "divider",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <ModelSelector disabled={isLoading} />
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setSettingsOpen(true)}
+              disabled={isLoading}
+              sx={{
+                bgcolor: "error.light",
+                color: "error.contrastText",
+                minWidth: "auto",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Settings
             </Button>
           </Box>
 
@@ -289,11 +330,6 @@ export default function Conversation() {
               alignItems: "center",
             }}
           >
-            <Box>
-              <IconButton onClick={() => setSettingsOpen(true)}>
-                <SettingsIcon />
-              </IconButton>
-            </Box>
             <Button
               variant="contained"
               onClick={handleInputSubmit}

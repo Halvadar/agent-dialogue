@@ -1,6 +1,6 @@
 "use client";
 import { Message, UseChatHelpers, UseChatOptions, useChat } from "ai/react";
-import React, { createContext, ReactNode, useEffect, useRef } from "react";
+import React, { createContext, ReactNode, useEffect } from "react";
 
 type AIChatContextType = UseChatHelpers;
 
@@ -20,7 +20,10 @@ export const AIChatProvider: React.FC<
     children: ReactNode;
   } & UseChatOptions
 > = ({ children, ...defaultOptions }) => {
-  const chat = useChat({ ...defaultOptions, ...options });
+  const chat = useChat({
+    ...defaultOptions,
+    ...options,
+  });
 
   return (
     <AIChatContext.Provider value={chat}>{children}</AIChatContext.Provider>
